@@ -159,71 +159,100 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen">
-      <header className="border-b dark:border-gray-800 bg-white dark:bg-gray-900">
-        <div className="px-4 py-3 flex items-center gap-4">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="px-3 py-1 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            ← Back
-          </button>
-
+    <div className="flex flex-col h-screen" style={{ background: 'var(--background)' }}>
+      <header style={{
+        background: 'var(--surface)',
+        borderBottom: '1px solid var(--border-light)'
+      }}>
+        <div className="px-6 py-4 flex items-center gap-4">
           <input
             type="text"
-            placeholder="Note title..."
+            placeholder="Untitled Note"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="flex-1 px-3 py-2 text-lg font-semibold bg-transparent focus:outline-none"
+            className="flex-1 px-0 py-1 text-2xl font-bold bg-transparent focus:outline-none"
+            style={{ color: 'var(--text-primary)' }}
           />
 
           <button
             onClick={() => {
               setShowPreview(!showPreview);
-              if (!showPreview) setShowDiff(false); // Close diff when opening preview
+              if (!showPreview) setShowDiff(false);
             }}
-            className={`px-3 py-1 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${
-              showPreview ? 'bg-blue-100 dark:bg-blue-900 border-blue-500' : ''
-            }`}
+            className="px-4 py-2 text-sm font-medium rounded transition-all"
+            style={{
+              background: showPreview ? 'rgba(61, 122, 237, 0.1)' : 'var(--surface)',
+              border: showPreview ? '2px solid var(--primary)' : '2px solid var(--border)',
+              color: showPreview ? 'var(--primary)' : 'var(--text-primary)'
+            }}
+            onMouseEnter={(e) => {
+              if (!showPreview) e.currentTarget.style.borderColor = 'var(--primary)';
+            }}
+            onMouseLeave={(e) => {
+              if (!showPreview) e.currentTarget.style.borderColor = 'var(--border)';
+            }}
           >
-            {showPreview ? '✓ Preview' : 'Preview'}
+            Preview
           </button>
 
           {slug !== 'new' && (
             <button
               onClick={() => {
                 toggleDiff();
-                if (!showDiff) setShowPreview(false); // Close preview when opening diff
+                if (!showDiff) setShowPreview(false);
               }}
-              className={`px-3 py-1 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                showDiff ? 'bg-blue-100 dark:bg-blue-900 border-blue-500' : ''
-              }`}
+              className="px-4 py-2 text-sm font-medium rounded transition-all"
+              style={{
+                background: showDiff ? 'rgba(61, 122, 237, 0.1)' : 'var(--surface)',
+                border: showDiff ? '2px solid var(--primary)' : '2px solid var(--border)',
+                color: showDiff ? 'var(--primary)' : 'var(--text-primary)',
+                borderRadius: 'var(--radius-sm)'
+              }}
+              onMouseEnter={(e) => {
+                if (!showDiff) e.currentTarget.style.borderColor = 'var(--primary)';
+              }}
+              onMouseLeave={(e) => {
+                if (!showDiff) e.currentTarget.style.borderColor = 'var(--border)';
+              }}
             >
-              {showDiff ? '✓ Diff' : 'Diff'}
+              Diff
             </button>
           )}
 
           <button
             onClick={handleSave}
             disabled={saving || !title.trim()}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            className="px-5 py-2 text-sm font-semibold text-white rounded transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+            style={{
+              background: 'var(--primary)',
+              borderRadius: 'var(--radius-sm)',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+            onMouseEnter={(e) => !saving && (e.currentTarget.style.background = 'var(--primary-hover)')}
+            onMouseLeave={(e) => !saving && (e.currentTarget.style.background = 'var(--primary)')}
           >
             {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
 
-        <div className="px-4 pb-3 flex items-center gap-2">
-          <span className="text-sm text-gray-600 dark:text-gray-400">Tags:</span>
+        <div className="px-6 pb-4 flex items-center gap-3">
+          <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Tags:</span>
           <div className="flex flex-wrap gap-2">
             {tags.map(tag => (
               <span
                 key={tag}
-                className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded flex items-center gap-1"
+                className="px-3 py-1 text-xs font-medium flex items-center gap-2"
+                style={{
+                  background: 'rgba(61, 122, 237, 0.1)',
+                  color: 'var(--primary)',
+                  borderRadius: 'var(--radius-sm)'
+                }}
               >
                 {tag}
                 <button
                   onClick={() => handleTagRemove(tag)}
-                  className="hover:text-red-600"
+                  className="hover:opacity-70 transition-opacity"
+                  style={{ color: 'var(--primary)' }}
                 >
                   ×
                 </button>
@@ -232,7 +261,21 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
             <input
               type="text"
               placeholder="Add tag..."
-              className="px-2 py-1 text-xs border rounded focus:outline-none dark:bg-gray-800 dark:border-gray-700"
+              className="px-3 py-1 text-xs rounded focus:outline-none transition-all"
+              style={{
+                background: 'var(--background)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                color: 'var(--text-primary)'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = 'var(--primary)';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(61, 122, 237, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   handleTagAdd(e.currentTarget.value);
@@ -246,42 +289,81 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
 
       <main className="flex-1 overflow-hidden flex">
         {/* Left side: Always show editor */}
-        <div className={showDiff || showPreview ? "w-1/2 border-r dark:border-gray-700" : "w-full"}>
+        <div
+          className={showDiff || showPreview ? "w-1/2" : "w-full"}
+          style={{
+            borderRight: showDiff || showPreview ? '1px solid var(--border-light)' : 'none'
+          }}
+        >
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Start writing in Markdown..."
-            className="w-full h-full p-8 resize-none focus:outline-none bg-transparent font-mono"
+            className="w-full h-full p-8 resize-none focus:outline-none font-mono"
+            style={{
+              background: 'var(--surface)',
+              color: 'var(--text-primary)',
+              fontSize: '15px',
+              lineHeight: '1.7'
+            }}
           />
         </div>
 
         {/* Right side: Show diff or preview */}
         {showDiff && (
-          <div className="w-1/2 h-full overflow-auto p-8 bg-gray-50 dark:bg-gray-900">
-            <h3 className="text-lg font-semibold mb-4">Git Diff</h3>
+          <div className="w-1/2 h-full overflow-auto p-8" style={{ background: 'var(--background)' }}>
+            <h3 className="text-xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
+              Git Diff
+            </h3>
             {diff ? (
-              <div className="border rounded dark:border-gray-700 font-mono text-sm bg-white dark:bg-gray-800">
+              <div className="font-mono text-sm rounded overflow-hidden" style={{
+                border: '1px solid var(--border-light)',
+                background: 'var(--surface)',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
                 {diff.split('\n').map((line, idx) => (
                   <div
                     key={idx}
-                    className={
-                      line.startsWith('+') && !line.startsWith('+++')
-                        ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 px-3 py-0.5'
-                        : line.startsWith('-') && !line.startsWith('---')
-                        ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 px-3 py-0.5'
-                        : line.startsWith('@@')
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-0.5 font-semibold'
-                        : line.startsWith('diff') || line.startsWith('index') || line.startsWith('---') || line.startsWith('+++')
-                        ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-3 py-0.5'
-                        : 'text-gray-700 dark:text-gray-300 px-3 py-0.5'
-                    }
+                    className="px-4 py-1"
+                    style={{
+                      background:
+                        line.startsWith('+') && !line.startsWith('+++')
+                          ? 'rgba(16, 185, 129, 0.1)'
+                          : line.startsWith('-') && !line.startsWith('---')
+                          ? 'rgba(239, 68, 68, 0.1)'
+                          : line.startsWith('@@')
+                          ? 'rgba(61, 122, 237, 0.1)'
+                          : line.startsWith('diff') || line.startsWith('index') || line.startsWith('---') || line.startsWith('+++')
+                          ? 'var(--background)'
+                          : 'transparent',
+                      color:
+                        line.startsWith('+') && !line.startsWith('+++')
+                          ? '#10b981'
+                          : line.startsWith('-') && !line.startsWith('---')
+                          ? '#ef4444'
+                          : line.startsWith('@@')
+                          ? 'var(--primary)'
+                          : line.startsWith('diff') || line.startsWith('index') || line.startsWith('---') || line.startsWith('+++')
+                          ? 'var(--text-muted)'
+                          : 'var(--text-secondary)',
+                      fontWeight: line.startsWith('@@') ? 600 : 400,
+                      borderLeft: line.startsWith('+') && !line.startsWith('+++')
+                          ? '3px solid #10b981'
+                          : line.startsWith('-') && !line.startsWith('---')
+                          ? '3px solid #ef4444'
+                          : '3px solid transparent'
+                    }}
                   >
                     {line || ' '}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-gray-500 dark:text-gray-400">
+              <div className="p-6 text-center rounded" style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border-light)',
+                color: 'var(--text-muted)'
+              }}>
                 No changes detected for this file.
               </div>
             )}
@@ -289,9 +371,22 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
         )}
 
         {showPreview && !showDiff && (
-          <div className="w-1/2 h-full overflow-auto p-8 bg-gray-50 dark:bg-gray-900 prose dark:prose-invert max-w-none">
-            <h3 className="text-lg font-semibold mb-4">Preview</h3>
-            <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }} />
+          <div className="w-1/2 h-full overflow-auto p-8 prose max-w-none" style={{
+            background: 'var(--background)',
+            color: 'var(--text-primary)'
+          }}>
+            <h3 className="text-xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
+              Preview
+            </h3>
+            <div
+              className="rounded p-6"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border-light)',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+              dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }}
+            />
           </div>
         )}
       </main>
