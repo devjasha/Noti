@@ -115,21 +115,6 @@ export default function DashboardPage() {
                 </Link>
               </div>
             </div>
-
-            <div className="p-5 space-y-3" style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border-light)',
-              borderRadius: 'var(--radius)',
-              boxShadow: 'var(--shadow-sm)'
-            }}>
-              <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>About Noti</h3>
-              <p className="text-sm" style={{
-                color: 'var(--text-secondary)',
-                lineHeight: '1.5'
-              }}>
-                Take notes in Neovim or the web interface. All notes are stored as markdown files with Git version control.
-              </p>
-            </div>
           </div>
         </div>
       </main>
