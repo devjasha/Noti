@@ -4,15 +4,29 @@ import GitStatus from '@/components/GitStatus';
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen">
-      <header className="border-b dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold">
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+      <header style={{
+        background: 'var(--header-bg)',
+        borderBottom: '1px solid var(--border-light)'
+      }}>
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <Link
+            href="/"
+            className="text-2xl font-bold transition-colors hover:opacity-80"
+            style={{ color: 'var(--primary)' }}
+          >
             Noti
           </Link>
           <Link
             href="/note/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-2.5 text-white font-medium transition-all hover:scale-105 active:scale-95"
+            style={{
+              background: 'var(--primary)',
+              borderRadius: 'var(--radius)',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary)'}
           >
             + New Note
           </Link>
