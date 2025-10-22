@@ -63,12 +63,42 @@ export default function NotesList() {
           placeholder="Search notes..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700"
+          className="flex-1 px-4 py-3 transition-all focus:outline-none"
+          style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)',
+            color: 'var(--text-primary)',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = 'var(--primary)';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(61, 122, 237, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = 'var(--border)';
+            e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+          }}
         />
         <select
           value={selectedFolder}
           onChange={(e) => setSelectedFolder(e.target.value)}
-          className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700"
+          className="px-4 py-3 transition-all focus:outline-none"
+          style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)',
+            color: 'var(--text-primary)',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = 'var(--primary)';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(61, 122, 237, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = 'var(--border)';
+            e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+          }}
         >
           <option value="all">All Folders</option>
           {folders.map(folder => (
@@ -78,7 +108,7 @@ export default function NotesList() {
       </div>
 
       {filteredNotes.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
           No notes found. Create your first note!
         </div>
       ) : (
@@ -87,21 +117,42 @@ export default function NotesList() {
             <Link
               key={note.slug}
               href={`/note/${note.slug}`}
-              className="block p-4 border rounded-lg hover:shadow-md transition-shadow dark:border-gray-700"
+              className="block p-5 transition-all"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border-light)',
+                borderRadius: 'var(--radius)',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-semibold">{note.title}</h3>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  {note.title}
+                </h3>
+                <span className="text-sm whitespace-nowrap ml-4" style={{ color: 'var(--text-muted)' }}>
                   {formatDate(note.modified)}
                 </span>
               </div>
 
               {note.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-2">
+                <div className="flex flex-wrap gap-2 mb-3">
                   {note.tags.map(tag => (
                     <span
                       key={tag}
-                      className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded"
+                      className="px-3 py-1 text-xs font-medium"
+                      style={{
+                        background: 'rgba(61, 122, 237, 0.1)',
+                        color: 'var(--primary)',
+                        borderRadius: 'var(--radius-sm)'
+                      }}
                     >
                       {tag}
                     </span>
@@ -110,8 +161,9 @@ export default function NotesList() {
               )}
 
               {note.folder && (
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  📁 {note.folder}
+                <div className="text-sm flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                  <span>📁</span>
+                  <span>{note.folder}</span>
                 </div>
               )}
             </Link>
