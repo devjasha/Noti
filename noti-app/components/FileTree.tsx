@@ -90,14 +90,12 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
       <div className="p-4 space-y-3 border-b" style={{ borderColor: 'var(--border-light)' }}>
         <Link
           href="/note/new"
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-white font-semibold transition-all hover:scale-105 active:scale-95"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-white font-semibold transition-all hover:scale-105 active:scale-95 hover:brightness-110"
           style={{
             background: 'var(--primary)',
             borderRadius: 'var(--radius-sm)',
             boxShadow: 'var(--shadow-sm)'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-hover)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary)'}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="12" y1="5" x2="12" y2="19"/>
