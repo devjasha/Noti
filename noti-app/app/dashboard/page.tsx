@@ -43,33 +43,88 @@ export default function DashboardPage() {
           <div className="space-y-6">
             <GitStatus />
 
-            <div className="border rounded-lg p-4 space-y-3 dark:border-gray-700">
-              <h3 className="font-semibold">Quick Actions</h3>
+            <div className="p-5 space-y-3" style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border-light)',
+              borderRadius: 'var(--radius)',
+              boxShadow: 'var(--shadow-sm)'
+            }}>
+              <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Quick Actions</h3>
               <div className="space-y-2">
                 <Link
                   href="/note/daily/today"
-                  className="block px-3 py-2 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="block px-4 py-2.5 text-sm font-medium transition-all"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius)',
+                    color: 'var(--text-primary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--border-light)';
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'var(--surface)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                  }}
                 >
-                  Today's Note
+                  📅 Today's Note
                 </Link>
                 <Link
                   href="/dashboard?folder=projects"
-                  className="block px-3 py-2 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="block px-4 py-2.5 text-sm font-medium transition-all"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius)',
+                    color: 'var(--text-primary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--border-light)';
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'var(--surface)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                  }}
                 >
-                  Projects
+                  📁 Projects
                 </Link>
                 <Link
                   href="/dashboard?folder=reference"
-                  className="block px-3 py-2 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="block px-4 py-2.5 text-sm font-medium transition-all"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius)',
+                    color: 'var(--text-primary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--border-light)';
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'var(--surface)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                  }}
                 >
-                  Reference
+                  📚 Reference
                 </Link>
               </div>
             </div>
 
-            <div className="border rounded-lg p-4 space-y-3 dark:border-gray-700">
-              <h3 className="font-semibold">About Noti</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="p-5 space-y-3" style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border-light)',
+              borderRadius: 'var(--radius)',
+              boxShadow: 'var(--shadow-sm)'
+            }}>
+              <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>About Noti</h3>
+              <p className="text-sm" style={{
+                color: 'var(--text-secondary)',
+                lineHeight: '1.5'
+              }}>
                 Take notes in Neovim or the web interface. All notes are stored as markdown files with Git version control.
               </p>
             </div>
