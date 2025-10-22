@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import NotesList from '@/components/NotesList';
 import GitStatus from '@/components/GitStatus';
