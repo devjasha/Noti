@@ -94,32 +94,50 @@ export default function GitStatus() {
   const hasChanges = (status.modified?.length || 0) + (status.created?.length || 0) + (status.deleted?.length || 0) > 0;
 
   return (
-    <div className="p-5 space-y-3" style={{
+    <div className="p-6 space-y-5" style={{
       background: 'var(--surface)',
       border: '1px solid var(--border-light)',
       borderRadius: 'var(--radius)',
-      boxShadow: 'var(--shadow-sm)'
+      boxShadow: 'var(--shadow-md)',
+      minHeight: '600px'
     }}>
-      <div className="flex justify-between items-center">
-        <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Git Status</h3>
-        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Branch: {status.current}</span>
+      <div className="flex justify-between items-center pb-4" style={{
+        borderBottom: '2px solid var(--border-light)'
+      }}>
+        <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Git Status</h3>
+        <span className="px-3 py-1 text-xs font-semibold" style={{
+          background: 'rgba(61, 122, 237, 0.1)',
+          color: 'var(--primary)',
+          borderRadius: 'var(--radius-sm)'
+        }}>
+          {status.current}
+        </span>
       </div>
 
       {remotes.length > 0 && (
-        <div className="text-sm border-b pb-2 dark:border-gray-700">
+        <div className="p-4 space-y-3" style={{
+          background: 'var(--background)',
+          borderRadius: 'var(--radius-sm)',
+          border: '1px solid var(--border-light)'
+        }}>
           <button
             onClick={() => setShowRemotes(!showRemotes)}
-            className="flex items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+            className="flex items-center gap-2 w-full text-left font-medium transition-colors"
+            style={{ color: 'var(--text-primary)' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
           >
-            <span>{showRemotes ? '▼' : '▶'}</span>
-            Remote: {remotes[0].name}
+            <span className="text-xs">{showRemotes ? '▼' : '▶'}</span>
+            <span>Remote: {remotes[0].name}</span>
           </button>
           {showRemotes && (
-            <div className="mt-2 pl-4 text-xs text-gray-500 dark:text-gray-400 break-all">
+            <div className="pl-6 space-y-2" style={{ color: 'var(--text-secondary)' }}>
               {remotes.map(remote => (
-                <div key={remote.name} className="space-y-1">
-                  <div><strong>{remote.name}</strong></div>
-                  <div>Push: {remote.refs.push}</div>
+                <div key={remote.name} className="space-y-1 text-sm">
+                  <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{remote.name}</div>
+                  <div className="text-xs break-all font-mono" style={{ color: 'var(--text-muted)' }}>
+                    {remote.refs.push}
+                  </div>
                 </div>
               ))}
             </div>
@@ -128,58 +146,117 @@ export default function GitStatus() {
       )}
 
       {remotes.length === 0 && (
-        <div className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
-          ⚠️ No remote configured. Set up with: <code className="text-xs bg-gray-200 dark:bg-gray-700 px-1 rounded">git remote add origin &lt;url&gt;</code>
+        <div className="p-4 space-y-2" style={{
+          background: 'rgba(251, 191, 36, 0.1)',
+          border: '1px solid rgba(251, 191, 36, 0.3)',
+          borderRadius: 'var(--radius-sm)'
+        }}>
+          <div className="flex items-center gap-2">
+            <span className="text-lg">⚠️</span>
+            <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>No Remote Configured</span>
+          </div>
+          <code className="block text-xs p-2 mt-2 font-mono" style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            color: 'var(--text-secondary)'
+          }}>
+            git remote add origin &lt;url&gt;
+          </code>
         </div>
       )}
 
       {hasChanges && (
-        <div className="text-sm space-y-2">
+        <div className="p-4 space-y-4" style={{
+          background: 'var(--background)',
+          borderRadius: 'var(--radius-sm)',
+          border: '1px solid var(--border-light)'
+        }}>
           <button
             onClick={() => setShowFiles(!showFiles)}
-            className="w-full text-left space-y-1"
+            className="w-full text-left space-y-3"
           >
-            <div className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
-              <span>{showFiles ? '▼' : '▶'}</span>
-              <span className="font-medium">Changes:</span>
+            <div className="flex items-center gap-2 font-medium transition-colors"
+              style={{ color: 'var(--text-primary)' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+            >
+              <span className="text-xs">{showFiles ? '▼' : '▶'}</span>
+              <span>Changes</span>
             </div>
-            <div className="pl-4 space-y-0.5">
+            <div className="flex gap-4 pl-6">
               {status.modified && status.modified.length > 0 && (
-                <div className="text-yellow-600 dark:text-yellow-400">
-                  Modified: {status.modified.length}
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ background: '#f59e0b' }}></div>
+                  <span className="text-sm font-medium" style={{ color: '#f59e0b' }}>
+                    {status.modified.length} Modified
+                  </span>
                 </div>
               )}
               {status.created && status.created.length > 0 && (
-                <div className="text-green-600 dark:text-green-400">
-                  Created: {status.created.length}
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ background: '#10b981' }}></div>
+                  <span className="text-sm font-medium" style={{ color: '#10b981' }}>
+                    {status.created.length} Added
+                  </span>
                 </div>
               )}
               {status.deleted && status.deleted.length > 0 && (
-                <div className="text-red-600 dark:text-red-400">
-                  Deleted: {status.deleted.length}
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ background: '#ef4444' }}></div>
+                  <span className="text-sm font-medium" style={{ color: '#ef4444' }}>
+                    {status.deleted.length} Deleted
+                  </span>
                 </div>
               )}
             </div>
           </button>
 
           {showFiles && (
-            <div className="pl-4 space-y-1 max-h-48 overflow-auto">
+            <div className="pl-6 space-y-2 max-h-64 overflow-auto" style={{
+              borderTop: '1px solid var(--border-light)',
+              paddingTop: '1rem'
+            }}>
               {status.modified && status.modified.map((file) => (
-                <div key={file} className="flex items-center gap-2 text-xs">
-                  <span className="text-yellow-600 dark:text-yellow-400">M</span>
-                  <span className="text-gray-700 dark:text-gray-300 font-mono truncate">{file}</span>
+                <div key={file} className="flex items-center gap-3 p-2 transition-colors" style={{
+                  borderRadius: 'var(--radius-sm)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span className="text-xs font-bold px-2 py-1 rounded" style={{
+                    background: 'rgba(245, 158, 11, 0.1)',
+                    color: '#f59e0b'
+                  }}>M</span>
+                  <span className="text-sm font-mono truncate" style={{ color: 'var(--text-secondary)' }}>{file}</span>
                 </div>
               ))}
               {status.created && status.created.map((file) => (
-                <div key={file} className="flex items-center gap-2 text-xs">
-                  <span className="text-green-600 dark:text-green-400">A</span>
-                  <span className="text-gray-700 dark:text-gray-300 font-mono truncate">{file}</span>
+                <div key={file} className="flex items-center gap-3 p-2 transition-colors" style={{
+                  borderRadius: 'var(--radius-sm)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span className="text-xs font-bold px-2 py-1 rounded" style={{
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    color: '#10b981'
+                  }}>A</span>
+                  <span className="text-sm font-mono truncate" style={{ color: 'var(--text-secondary)' }}>{file}</span>
                 </div>
               ))}
               {status.deleted && status.deleted.map((file) => (
-                <div key={file} className="flex items-center gap-2 text-xs">
-                  <span className="text-red-600 dark:text-red-400">D</span>
-                  <span className="text-gray-700 dark:text-gray-300 font-mono truncate">{file}</span>
+                <div key={file} className="flex items-center gap-3 p-2 transition-colors" style={{
+                  borderRadius: 'var(--radius-sm)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span className="text-xs font-bold px-2 py-1 rounded" style={{
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    color: '#ef4444'
+                  }}>D</span>
+                  <span className="text-sm font-mono truncate" style={{ color: 'var(--text-secondary)' }}>{file}</span>
                 </div>
               ))}
             </div>
@@ -187,104 +264,118 @@ export default function GitStatus() {
         </div>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex gap-3 pt-2">
         {hasChanges && !showCommit && (
           <button
             onClick={() => setShowCommit(true)}
-            className="px-4 py-2 text-sm text-white font-medium transition-all"
+            className="flex-1 px-5 py-3 text-sm text-white font-semibold transition-all hover:scale-105 active:scale-95"
             style={{
               background: 'var(--primary)',
               borderRadius: 'var(--radius)',
-              boxShadow: 'var(--shadow-sm)'
+              boxShadow: 'var(--shadow-md)'
             }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-hover)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary)'}
           >
-            Commit
+            Commit Changes
           </button>
         )}
         <button
           onClick={() => handleSync('pull')}
           disabled={syncing}
-          className="px-4 py-2 text-sm font-medium transition-all disabled:opacity-50"
+          className="flex-1 px-5 py-3 text-sm font-semibold transition-all disabled:opacity-50"
           style={{
             background: 'var(--surface)',
-            border: '1px solid var(--border)',
+            border: '2px solid var(--border)',
             borderRadius: 'var(--radius)',
             color: 'var(--text-primary)'
           }}
-          onMouseEnter={(e) => !syncing && (e.currentTarget.style.background = 'var(--border-light)')}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
+          onMouseEnter={(e) => !syncing && (e.currentTarget.style.borderColor = 'var(--primary)')}
+          onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
         >
-          Pull
+          ↓ Pull
         </button>
         <button
           onClick={() => handleSync('push')}
           disabled={syncing}
-          className="px-4 py-2 text-sm font-medium transition-all disabled:opacity-50"
+          className="flex-1 px-5 py-3 text-sm font-semibold transition-all disabled:opacity-50"
           style={{
             background: 'var(--surface)',
-            border: '1px solid var(--border)',
+            border: '2px solid var(--border)',
             borderRadius: 'var(--radius)',
             color: 'var(--text-primary)'
           }}
-          onMouseEnter={(e) => !syncing && (e.currentTarget.style.background = 'var(--border-light)')}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
+          onMouseEnter={(e) => !syncing && (e.currentTarget.style.borderColor = 'var(--primary)')}
+          onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
         >
-          Push
+          ↑ Push
         </button>
       </div>
 
       {showCommit && (
-        <div className="space-y-2 pt-3" style={{ borderTop: '1px solid var(--border-light)' }}>
-          <input
-            type="text"
-            placeholder="Commit message..."
-            value={commitMessage}
-            onChange={(e) => setCommitMessage(e.target.value)}
-            className="w-full px-3 py-2 transition-all focus:outline-none"
-            style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius)',
-              color: 'var(--text-primary)'
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = 'var(--primary)';
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(61, 122, 237, 0.1)';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = 'var(--border)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-            onKeyPress={(e) => e.key === 'Enter' && handleCommit()}
-          />
-          <div className="flex gap-2">
+        <div className="space-y-4 pt-5 mt-3" style={{
+          borderTop: '2px solid var(--border-light)'
+        }}>
+          <div>
+            <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              Commit Message
+            </label>
+            <input
+              type="text"
+              placeholder="Enter your commit message..."
+              value={commitMessage}
+              onChange={(e) => setCommitMessage(e.target.value)}
+              className="w-full px-4 py-3 transition-all focus:outline-none"
+              style={{
+                background: 'var(--surface)',
+                border: '2px solid var(--border)',
+                borderRadius: 'var(--radius)',
+                color: 'var(--text-primary)',
+                fontSize: '14px'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = 'var(--primary)';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(61, 122, 237, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+              onKeyPress={(e) => e.key === 'Enter' && handleCommit()}
+            />
+          </div>
+          <div className="flex gap-3">
             <button
               onClick={handleCommit}
               disabled={!commitMessage.trim() || syncing}
-              className="px-4 py-2 text-sm text-white font-medium transition-all disabled:opacity-50"
+              className="flex-1 px-5 py-3 text-sm text-white font-semibold transition-all disabled:opacity-50 hover:scale-105 active:scale-95"
               style={{
                 background: 'var(--secondary)',
                 borderRadius: 'var(--radius)',
-                boxShadow: 'var(--shadow-sm)'
+                boxShadow: 'var(--shadow-md)'
               }}
             >
-              Commit
+              ✓ Commit
             </button>
             <button
               onClick={() => { setShowCommit(false); setCommitMessage(''); }}
-              className="px-4 py-2 text-sm font-medium transition-all"
+              className="flex-1 px-5 py-3 text-sm font-semibold transition-all"
               style={{
                 background: 'var(--surface)',
-                border: '1px solid var(--border)',
+                border: '2px solid var(--border)',
                 borderRadius: 'var(--radius)',
                 color: 'var(--text-primary)'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--border-light)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--primary)';
+                e.currentTarget.style.background = 'var(--background)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.background = 'var(--surface)';
+              }}
             >
-              Cancel
+              × Cancel
             </button>
           </div>
         </div>
