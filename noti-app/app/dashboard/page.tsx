@@ -1,24 +1,52 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import NotesList from '@/components/NotesList';
+import FileTree from '@/components/FileTree';
+import MarkdownEditor from '@/components/MarkdownEditor';
 import GitStatus from '@/components/GitStatus';
 
 export default function DashboardPage() {
+  const [showFileTree, setShowFileTree] = useState(true);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const selectedNote = searchParams.get('note');
+
+  const handleNoteSelect = (slug: string) => {
+    router.push(`/dashboard?note=${slug}`);
+  };
+
   return (
-    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--background)' }}>
+      {/* Header */}
       <header style={{
         background: 'var(--header-bg)',
         borderBottom: '1px solid var(--border-light)'
       }}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Link
-            href="/"
-            className="text-2xl font-bold transition-colors hover:opacity-80"
-            style={{ color: 'var(--primary)' }}
-          >
-            Noti
-          </Link>
+        <div className="px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowFileTree(!showFileTree)}
+              className="p-2 rounded transition-all"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+            >
+              {showFileTree ? '◀' : '▶'}
+            </button>
+            <Link
+              href="/"
+              className="text-2xl font-bold transition-colors hover:opacity-80"
+              style={{ color: 'var(--primary)' }}
+            >
+              Noti
+            </Link>
+          </div>
           <Link
             href="/note/new"
             className="px-6 py-2.5 text-white font-medium transition-all hover:scale-105 active:scale-95"
@@ -35,16 +63,40 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <h1 className="text-3xl font-bold mb-6">Your Notes</h1>
-            <NotesList />
+      {/* Main Content */}
+      <main className="flex-1 flex overflow-hidden">
+        {/* File Tree Sidebar */}
+        {showFileTree && (
+          <div className="w-64 flex-shrink-0 overflow-hidden">
+            <FileTree selectedNote={selectedNote || undefined} onNoteSelect={handleNoteSelect} />
           </div>
+        )}
 
-          <div className="space-y-6">
-            <GitStatus />
-          </div>
+        {/* Note Editor/Viewer */}
+        <div className="flex-1 overflow-auto">
+          {selectedNote ? (
+            <MarkdownEditor slug={selectedNote} />
+          ) : (
+            <div className="flex items-center justify-center h-full" style={{ color: 'var(--text-muted)' }}>
+              <div className="text-center space-y-4">
+                <div className="text-6xl">📝</div>
+                <h2 className="text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  Welcome to Noti
+                </h2>
+                <p className="text-lg">
+                  Select a note from the sidebar or create a new one
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Git Status Sidebar */}
+        <div className="w-96 flex-shrink-0 overflow-auto p-4" style={{
+          background: 'var(--background)',
+          borderLeft: '1px solid var(--border-light)'
+        }}>
+          <GitStatus />
         </div>
       </main>
     </div>

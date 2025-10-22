@@ -1,4 +1,4 @@
-import MarkdownEditor from '@/components/MarkdownEditor';
+import { redirect } from 'next/navigation';
 
 export default async function NotePage({
   params,
@@ -8,5 +8,6 @@ export default async function NotePage({
   const { slug } = await params;
   const noteSlug = slug.join('/');
 
-  return <MarkdownEditor slug={noteSlug} />;
+  // Redirect to dashboard with the note selected
+  redirect(`/dashboard?note=${noteSlug}`);
 }
