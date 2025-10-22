@@ -1,0 +1,30 @@
+services:
+  noti-app:
+    build:
+      context: ./noti-app
+      dockerfile: Dockerfile
+    container_name: noti
+    # Run as root to access SSH keys, entrypoint will handle user switching if needed
+    # user: "1000:1000"
+    ports:
+      - "3000:3000"
+    volumes:
+      - /home/bwardsen/work/my-notes:/app/notes
+      - ~/.ssh:/tmp/host-ssh:ro,z
+    environment:
+      - NODE_ENV=production
+      - NOTES_DIR=/app/notes
+      # Optional: For HTTPS authentication (leave commented if using SSH)
+      # - GIT_USERNAME=devjasha
+      # - GIT_TOKEN=your-token-here
+    restart: unless-stopped
+    networks:
+      - noti-network
+
+networks:
+  noti-network:
+    driver: bridge
+
+volumes:
+  notes:
+    driver: local

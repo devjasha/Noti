@@ -1,0 +1,51 @@
+# Environment variables with secrets
+.env
+.env.local
+.env*.local
+
+# Node modules
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependencies
+package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+docker-compose.override.yml
+
+# Notes directory (should be separate repo)
+notes/
+my-notes/
+
+# Git credentials
+.git-credentials
