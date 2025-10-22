@@ -94,10 +94,15 @@ export default function GitStatus() {
   const hasChanges = (status.modified?.length || 0) + (status.created?.length || 0) + (status.deleted?.length || 0) > 0;
 
   return (
-    <div className="border rounded-lg p-4 space-y-3 dark:border-gray-700">
+    <div className="p-5 space-y-3" style={{
+      background: 'var(--surface)',
+      border: '1px solid var(--border-light)',
+      borderRadius: 'var(--radius)',
+      boxShadow: 'var(--shadow-sm)'
+    }}>
       <div className="flex justify-between items-center">
-        <h3 className="font-semibold">Git Status</h3>
-        <span className="text-sm text-gray-500">Branch: {status.current}</span>
+        <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Git Status</h3>
+        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Branch: {status.current}</span>
       </div>
 
       {remotes.length > 0 && (
@@ -186,7 +191,14 @@ export default function GitStatus() {
         {hasChanges && !showCommit && (
           <button
             onClick={() => setShowCommit(true)}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="px-4 py-2 text-sm text-white font-medium transition-all"
+            style={{
+              background: 'var(--primary)',
+              borderRadius: 'var(--radius)',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary)'}
           >
             Commit
           </button>
@@ -194,40 +206,83 @@ export default function GitStatus() {
         <button
           onClick={() => handleSync('pull')}
           disabled={syncing}
-          className="px-3 py-1 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+          className="px-4 py-2 text-sm font-medium transition-all disabled:opacity-50"
+          style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)',
+            color: 'var(--text-primary)'
+          }}
+          onMouseEnter={(e) => !syncing && (e.currentTarget.style.background = 'var(--border-light)')}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
         >
           Pull
         </button>
         <button
           onClick={() => handleSync('push')}
           disabled={syncing}
-          className="px-3 py-1 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+          className="px-4 py-2 text-sm font-medium transition-all disabled:opacity-50"
+          style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)',
+            color: 'var(--text-primary)'
+          }}
+          onMouseEnter={(e) => !syncing && (e.currentTarget.style.background = 'var(--border-light)')}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
         >
           Push
         </button>
       </div>
 
       {showCommit && (
-        <div className="space-y-2 pt-2 border-t dark:border-gray-700">
+        <div className="space-y-2 pt-3" style={{ borderTop: '1px solid var(--border-light)' }}>
           <input
             type="text"
             placeholder="Commit message..."
             value={commitMessage}
             onChange={(e) => setCommitMessage(e.target.value)}
-            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700"
+            className="w-full px-3 py-2 transition-all focus:outline-none"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius)',
+              color: 'var(--text-primary)'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = 'var(--primary)';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(61, 122, 237, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
             onKeyPress={(e) => e.key === 'Enter' && handleCommit()}
           />
           <div className="flex gap-2">
             <button
               onClick={handleCommit}
               disabled={!commitMessage.trim() || syncing}
-              className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+              className="px-4 py-2 text-sm text-white font-medium transition-all disabled:opacity-50"
+              style={{
+                background: 'var(--secondary)',
+                borderRadius: 'var(--radius)',
+                boxShadow: 'var(--shadow-sm)'
+              }}
             >
               Commit
             </button>
             <button
               onClick={() => { setShowCommit(false); setCommitMessage(''); }}
-              className="px-3 py-1 text-sm border rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="px-4 py-2 text-sm font-medium transition-all"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius)',
+                color: 'var(--text-primary)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--border-light)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
             >
               Cancel
             </button>
