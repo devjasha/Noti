@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MarkdownEditorProps {
   slug: string;
@@ -9,6 +11,7 @@ interface MarkdownEditorProps {
 
 export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
   const router = useRouter();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -154,6 +157,40 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
     setTags(tags.filter(t => t !== tag));
   };
 
+  const insertMarkdown = (before: string, after: string = '', placeholder: string = '') => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end) || placeholder;
+    const newText = content.substring(0, start) + before + selectedText + after + content.substring(end);
+
+    setContent(newText);
+
+    // Set cursor position after insertion
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + before.length + selectedText.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
+  const insertLink = () => {
+    const url = prompt('Enter URL:');
+    if (url) {
+      insertMarkdown('[', `](${url})`, 'link text');
+    }
+  };
+
+  const insertImage = () => {
+    const url = prompt('Enter image URL:');
+    if (url) {
+      const alt = prompt('Enter image description (optional):') || 'image';
+      insertMarkdown(`![${alt}](${url})`);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-8">Loading note...</div>;
   }
@@ -287,27 +324,154 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden flex">
-        {/* Left side: Always show editor */}
-        <div
-          className={showDiff || showPreview ? "w-1/2" : "w-full"}
-          style={{
-            borderRight: showDiff || showPreview ? '1px solid var(--border-light)' : 'none'
-          }}
-        >
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Start writing in Markdown..."
-            className="w-full h-full p-8 resize-none focus:outline-none font-mono"
+      <main className="flex-1 overflow-hidden flex flex-col">
+        {/* Toolbar */}
+        <div className="flex items-center gap-2 px-4 py-2" style={{
+          background: 'var(--surface)',
+          borderBottom: '1px solid var(--border-light)'
+        }}>
+          <button
+            onClick={() => insertMarkdown('**', '**', 'bold text')}
+            className="p-2 rounded transition-all"
             style={{
-              background: 'var(--surface)',
-              color: 'var(--text-primary)',
-              fontSize: '15px',
-              lineHeight: '1.7'
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)'
             }}
-          />
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+            title="Bold"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>
+              <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>
+            </svg>
+          </button>
+          <button
+            onClick={() => insertMarkdown('*', '*', 'italic text')}
+            className="p-2 rounded transition-all"
+            style={{
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+            title="Italic"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="19" y1="4" x2="10" y2="4"/>
+              <line x1="14" y1="20" x2="5" y2="20"/>
+              <line x1="15" y1="4" x2="9" y2="20"/>
+            </svg>
+          </button>
+          <button
+            onClick={() => insertMarkdown('# ', '', 'Heading')}
+            className="p-2 rounded transition-all"
+            style={{
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+            title="Heading"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M4 12h8m-8-6v12m8-12v12m5-9h6m-6 6h6m-6-3h6"/>
+            </svg>
+          </button>
+          <div style={{ width: '1px', height: '20px', background: 'var(--border)' }}></div>
+          <button
+            onClick={insertLink}
+            className="p-2 rounded transition-all"
+            style={{
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+            title="Insert Link"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+          </button>
+          <button
+            onClick={insertImage}
+            className="p-2 rounded transition-all"
+            style={{
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+            title="Insert Image"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15l-5-5L5 21"/>
+            </svg>
+          </button>
+          <button
+            onClick={() => insertMarkdown('- ', '', 'List item')}
+            className="p-2 rounded transition-all"
+            style={{
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+            title="Bullet List"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="8" y1="6" x2="21" y2="6"/>
+              <line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/>
+              <line x1="3" y1="12" x2="3.01" y2="12"/>
+              <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+          </button>
+          <button
+            onClick={() => insertMarkdown('`', '`', 'code')}
+            className="p-2 rounded transition-all"
+            style={{
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+            title="Inline Code"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+          </button>
         </div>
+
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left side: Always show editor */}
+          <div
+            className={showDiff || showPreview ? "w-1/2" : "w-full"}
+            style={{
+              borderRight: showDiff || showPreview ? '1px solid var(--border-light)' : 'none'
+            }}
+          >
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Start writing in Markdown..."
+              className="w-full h-full p-8 resize-none focus:outline-none font-mono"
+              style={{
+                background: 'var(--surface)',
+                color: 'var(--text-primary)',
+                fontSize: '15px',
+                lineHeight: '1.7'
+              }}
+            />
+          </div>
 
         {/* Right side: Show diff or preview */}
         {showDiff && (
@@ -371,24 +535,28 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
         )}
 
         {showPreview && !showDiff && (
-          <div className="w-1/2 h-full overflow-auto p-8 prose max-w-none" style={{
-            background: 'var(--background)',
-            color: 'var(--text-primary)'
+          <div className="w-1/2 h-full overflow-auto p-8" style={{
+            background: 'var(--background)'
           }}>
             <h3 className="text-xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
               Preview
             </h3>
             <div
-              className="rounded p-6"
+              className="rounded p-6 prose prose-slate max-w-none"
               style={{
                 background: 'var(--surface)',
                 border: '1px solid var(--border-light)',
-                boxShadow: 'var(--shadow-sm)'
+                boxShadow: 'var(--shadow-sm)',
+                color: 'var(--text-primary)'
               }}
-              dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }}
-            />
+            >
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {content}
+              </ReactMarkdown>
+            </div>
           </div>
         )}
+        </div>
       </main>
     </div>
   );
