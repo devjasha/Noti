@@ -255,7 +255,16 @@ export default function HistoryModal({ filePath, commitHash, onClose }: HistoryM
                     li: ({ node, ...props }) => <li style={{ color: 'var(--text-secondary)' }} {...props} />,
                   }}
                 >
-                  {note.content}
+                  {note.content
+                    // First, convert multiple newlines to preserve spacing by adding placeholder paragraphs
+                    .replace(/\n\n+/g, (match) => {
+                      // For each pair of newlines beyond the first, add an empty paragraph marker
+                      const extraNewlines = match.length - 2;
+                      return '\n\n' + ('&nbsp;\n\n'.repeat(extraNewlines));
+                    })
+                    // Then add double spaces before single newlines for line breaks
+                    .replace(/([^\n])\n([^\n])/g, '$1  \n$2')
+                  }
                 </ReactMarkdown>
               </div>
             </div>

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 interface MarkdownEditorProps {
   slug: string;
@@ -557,23 +558,33 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
         )}
 
         {showPreview && !showDiff && (
-          <div className="w-1/2 h-full overflow-auto p-8" style={{
-            background: 'var(--background)'
+          <div className="w-1/2 h-full overflow-auto py-8 px-6" style={{
+            background: 'var(--surface)'
           }}>
-            <h3 className="text-xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
-              Preview
-            </h3>
             <div
-              className="rounded p-6 prose prose-slate max-w-none"
+              className="max-w-none"
               style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border-light)',
-                boxShadow: 'var(--shadow-sm)',
-                color: 'var(--text-primary)'
+                color: 'var(--text-primary)',
+                lineHeight: '1.7'
               }}
             >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {content}
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p: ({ node, ...props }) => <p style={{ margin: '0.5em 0', color: 'var(--text-secondary)' }} {...props} />,
+                  br: () => <br />,
+                }}
+              >
+                {content
+                  // First, convert multiple newlines to preserve spacing by adding placeholder paragraphs
+                  .replace(/\n\n+/g, (match) => {
+                    // For each pair of newlines beyond the first, add an empty paragraph marker
+                    const extraNewlines = match.length - 2;
+                    return '\n\n' + ('&nbsp;\n\n'.repeat(extraNewlines));
+                  })
+                  // Then add double spaces before single newlines for line breaks
+                  .replace(/([^\n])\n([^\n])/g, '$1  \n$2')
+                }
               </ReactMarkdown>
             </div>
           </div>
