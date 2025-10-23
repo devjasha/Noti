@@ -1,0 +1,31 @@
+{
+  "name": "Solarized Osaka",
+  "author": "Takuya Matsuyama (adapted)",
+  "version": "1.0.0",
+  "description": "Enhanced Solarized theme with additional colors, inspired by Tokyo nights",
+  "type": "dark",
+  "colors": {
+    "primary": "#1a7fcf",
+    "primaryHover": "#2686d4",
+    "secondary": "#1a9980",
+    "accent": "#d97d29",
+    "background": "#001a26",
+    "surface": "#003d5c",
+    "headerBg": "#002838",
+    "foreground": "#9db3b8",
+    "textPrimary": "#b8c5ca",
+    "textSecondary": "#9db3b8",
+    "textMuted": "#6d8791",
+    "border": "#1a4d66",
+    "borderLight": "#25566e"
+  },
+  "shadows": {
+    "sm": "0 1px 2px 0 rgba(0, 0, 0, 0.3)",
+    "md": "0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3)",
+    "lg": "0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4)"
+  },
+  "radius": {
+    "default": "8px",
+    "sm": "6px"
+  }
+}

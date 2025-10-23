@@ -267,51 +267,6 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                setShowPreview(!showPreview);
-                if (!showPreview) setShowDiff(false);
-              }}
-              className="px-4 py-2 text-sm font-medium rounded transition-all"
-              style={{
-                background: showPreview ? 'rgba(61, 122, 237, 0.1)' : 'var(--surface)',
-                border: showPreview ? '2px solid var(--primary)' : '2px solid var(--border)',
-                color: showPreview ? 'var(--primary)' : 'var(--text-primary)'
-              }}
-              onMouseEnter={(e) => {
-                if (!showPreview) e.currentTarget.style.borderColor = 'var(--primary)';
-              }}
-              onMouseLeave={(e) => {
-                if (!showPreview) e.currentTarget.style.borderColor = 'var(--border)';
-              }}
-            >
-              Preview
-            </button>
-
-            {slug !== 'new' && (
-              <button
-                onClick={() => {
-                  toggleDiff();
-                  if (!showDiff) setShowPreview(false);
-                }}
-                className="px-4 py-2 text-sm font-medium rounded transition-all"
-                style={{
-                  background: showDiff ? 'rgba(61, 122, 237, 0.1)' : 'var(--surface)',
-                  border: showDiff ? '2px solid var(--primary)' : '2px solid var(--border)',
-                  color: showDiff ? 'var(--primary)' : 'var(--text-primary)',
-                  borderRadius: 'var(--radius-sm)'
-                }}
-                onMouseEnter={(e) => {
-                  if (!showDiff) e.currentTarget.style.borderColor = 'var(--primary)';
-                }}
-                onMouseLeave={(e) => {
-                  if (!showDiff) e.currentTarget.style.borderColor = 'var(--border)';
-                }}
-              >
-                Diff
-              </button>
-            )}
-
-            <button
               onClick={handleSave}
               disabled={saving || !title.trim()}
               className="px-5 py-2 text-sm font-semibold text-white rounded transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
@@ -455,7 +410,83 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
           </button>
         </div>
 
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden relative">
+          {/* Floating Action Menu - Always Bottom Right */}
+          <div
+            className="absolute flex flex-col gap-2 z-10"
+            style={{
+              bottom: '1.5rem',
+              right: '1.5rem',
+              filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3))'
+            }}
+          >
+              <button
+                onClick={() => {
+                  setShowPreview(!showPreview);
+                  if (!showPreview) setShowDiff(false);
+                }}
+                className="p-3 rounded-lg transition-all hover:scale-110 active:scale-95"
+                style={{
+                  background: showPreview ? 'var(--primary)' : 'var(--surface)',
+                  border: '2px solid var(--border-light)',
+                  color: showPreview ? 'white' : 'var(--text-primary)',
+                  boxShadow: 'var(--shadow-md)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!showPreview) {
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                    e.currentTarget.style.background = 'rgba(61, 122, 237, 0.1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!showPreview) {
+                    e.currentTarget.style.borderColor = 'var(--border-light)';
+                    e.currentTarget.style.background = 'var(--surface)';
+                  }
+                }}
+                title="Toggle Preview"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+
+              {slug !== 'new' && (
+                <button
+                  onClick={() => {
+                    toggleDiff();
+                    if (!showDiff) setShowPreview(false);
+                  }}
+                  className="p-3 rounded-lg transition-all hover:scale-110 active:scale-95"
+                  style={{
+                    background: showDiff ? 'var(--primary)' : 'var(--surface)',
+                    border: '2px solid var(--border-light)',
+                    color: showDiff ? 'white' : 'var(--text-primary)',
+                    boxShadow: 'var(--shadow-md)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!showDiff) {
+                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.background = 'rgba(61, 122, 237, 0.1)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!showDiff) {
+                      e.currentTarget.style.borderColor = 'var(--border-light)';
+                      e.currentTarget.style.background = 'var(--surface)';
+                    }
+                  }}
+                  title="Toggle Diff"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/>
+                    <path d="M9 7h.01M9 12h.01M9 17h.01M15 7h.01M15 12h.01M15 17h.01"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+
           {/* Left side: Always show editor */}
           <div
             className={showDiff || showPreview ? "w-1/2 flex" : "w-full flex"}
