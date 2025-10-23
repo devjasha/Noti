@@ -10,6 +10,10 @@ echo "🏠 HOME directory set to: $HOME"
 # Configure git safe directory
 git config --global --add safe.directory /app/notes
 
+# Configure git user identity
+git config --global user.email "jasha@chec.de"
+git config --global user.name "devjasha"
+
 # Copy SSH keys from mounted host directory
 if [ -d "/tmp/host-ssh" ]; then
   echo "🔑 Copying SSH keys from host..."

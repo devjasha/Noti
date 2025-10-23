@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import FileTree from '@/components/FileTree';
 import MarkdownEditor from '@/components/MarkdownEditor';
 import GitStatus from '@/components/GitStatus';
 
-export default function DashboardPage() {
+function DashboardContent() {
   const [showFileTree, setShowFileTree] = useState(true);
   const [showGitStatus, setShowGitStatus] = useState(true);
   const searchParams = useSearchParams();
@@ -84,5 +84,20 @@ export default function DashboardPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--background)' }}>
+        <div className="text-center">
+          <div className="text-4xl mb-4">📝</div>
+          <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
+        </div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
