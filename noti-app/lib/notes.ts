@@ -280,3 +280,67 @@ export async function getFileDiff(filePath: string, staged: boolean = false) {
     : await git.diff(['--', filePath]);
   return diff;
 }
+
+export interface FileCommit {
+  hash: string;
+  date: string;
+  message: string;
+  author_name: string;
+  author_email: string;
+  refs: string;
+}
+
+/**
+ * Get commit history for a specific file
+ * Uses --follow to track file renames
+ */
+export async function getFileHistory(filePath: string): Promise<FileCommit[]> {
+  const git = getGit();
+
+  // Use --follow to track file renames, and format output for easy parsing
+  const log = await git.log({
+    file: filePath,
+    '--follow': null,
+  });
+
+  return log.all.map(commit => ({
+    hash: commit.hash,
+    date: commit.date,
+    message: commit.message,
+    author_name: commit.author_name,
+    author_email: commit.author_email,
+    refs: commit.refs,
+  }));
+}
+
+/**
+ * Get file content at a specific commit
+ */
+export async function getFileAtCommit(filePath: string, commitHash: string): Promise<Note | null> {
+  const git = getGit();
+
+  try {
+    // Get file content at specific commit
+    const content = await git.show([`${commitHash}:${filePath}`]);
+
+    // Parse the content with gray-matter
+    const { data, content: markdownContent } = matter(content);
+
+    const slug = filePath.replace(/\.md$/, '').replace(/\\/g, '/');
+    const folder = path.dirname(filePath);
+
+    return {
+      slug,
+      title: data.title || path.basename(filePath, '.md'),
+      content: markdownContent,
+      tags: data.tags || [],
+      created: data.created || '',
+      modified: data.modified || '',
+      folder: folder === '.' ? '' : folder,
+      filePath,
+    };
+  } catch (error) {
+    console.error(`Error getting file at commit ${commitHash}:`, error);
+    return null;
+  }
+}
