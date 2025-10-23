@@ -1,0 +1,31 @@
+{
+  "name": "Kanagawa",
+  "author": "rebelot",
+  "version": "1.0.0",
+  "description": "NeoVim dark colorscheme inspired by the colors of the famous painting by Katsushika Hokusai",
+  "type": "dark",
+  "colors": {
+    "primary": "#7E9CD8",
+    "primaryHover": "#658594",
+    "secondary": "#957FB8",
+    "accent": "#D27E99",
+    "background": "#1F1F28",
+    "surface": "#2A2A37",
+    "headerBg": "#16161D",
+    "foreground": "#DCD7BA",
+    "textPrimary": "#DCD7BA",
+    "textSecondary": "#C8C093",
+    "textMuted": "#727169",
+    "border": "#54546D",
+    "borderLight": "#363646"
+  },
+  "shadows": {
+    "sm": "0 1px 3px rgba(0, 0, 0, 0.3)",
+    "md": "0 4px 6px rgba(0, 0, 0, 0.2)",
+    "lg": "0 10px 15px rgba(0, 0, 0, 0.2)"
+  },
+  "radius": {
+    "default": "1.3em",
+    "sm": "0.5em"
+  }
+}

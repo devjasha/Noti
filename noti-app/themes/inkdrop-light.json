@@ -1,0 +1,31 @@
+{
+  "name": "Inkdrop Light",
+  "author": "Takuya Matsuyama",
+  "version": "1.0.0",
+  "description": "Default light theme inspired by Inkdrop",
+  "type": "light",
+  "colors": {
+    "primary": "#3d7aed",
+    "primaryHover": "#2d6add",
+    "secondary": "#7d6ae0",
+    "accent": "#ff63c3",
+    "background": "#f6f9fe",
+    "surface": "#ffffff",
+    "headerBg": "#ecf2fd",
+    "foreground": "#031b4e",
+    "textPrimary": "#031b4e",
+    "textSecondary": "#373e42",
+    "textMuted": "#6b7280",
+    "border": "#e5e7eb",
+    "borderLight": "#f3f4f6"
+  },
+  "shadows": {
+    "sm": "0 1px 3px rgba(34, 36, 38, 0.15)",
+    "md": "0 4px 6px rgba(34, 36, 38, 0.1)",
+    "lg": "0 10px 15px rgba(34, 36, 38, 0.1)"
+  },
+  "radius": {
+    "default": "1.3em",
+    "sm": "0.5em"
+  }
+}
