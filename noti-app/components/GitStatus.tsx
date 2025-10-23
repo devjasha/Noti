@@ -94,18 +94,15 @@ export default function GitStatus() {
   const hasChanges = (status.modified?.length || 0) + (status.created?.length || 0) + (status.deleted?.length || 0) > 0;
 
   return (
-    <div className="p-6 space-y-5" style={{
+    <div className="h-full flex flex-col" style={{
       background: 'var(--surface)',
-      border: '1px solid var(--border-light)',
-      borderRadius: 'var(--radius)',
-      boxShadow: 'var(--shadow-md)',
-      minHeight: '600px'
+      borderLeft: '1px solid var(--border-light)'
     }}>
-      <div className="flex justify-between items-center pb-4" style={{
-        borderBottom: '2px solid var(--border-light)'
+      <div className="flex justify-between items-center p-4 border-b" style={{
+        borderColor: 'var(--border-light)'
       }}>
-        <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Git Status</h3>
-        <span className="px-3 py-1 text-xs font-semibold" style={{
+        <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Git Status</h3>
+        <span className="px-2 py-1 text-xs font-medium" style={{
           background: 'rgba(61, 122, 237, 0.1)',
           color: 'var(--primary)',
           borderRadius: 'var(--radius-sm)'
@@ -114,8 +111,9 @@ export default function GitStatus() {
         </span>
       </div>
 
+      <div className="flex-1 overflow-auto p-4 space-y-4">
       {remotes.length > 0 && (
-        <div className="p-4 space-y-3" style={{
+        <div className="p-3 space-y-3" style={{
           background: 'var(--background)',
           borderRadius: 'var(--radius-sm)',
           border: '1px solid var(--border-light)'
@@ -167,7 +165,7 @@ export default function GitStatus() {
       )}
 
       {hasChanges && (
-        <div className="p-4 space-y-4" style={{
+        <div className="p-3 space-y-4" style={{
           background: 'var(--background)',
           borderRadius: 'var(--radius-sm)',
           border: '1px solid var(--border-light)'
@@ -263,31 +261,33 @@ export default function GitStatus() {
           )}
         </div>
       )}
+      </div>
 
-      <div className="flex gap-3 pt-2">
+      {/* Fixed bottom action buttons */}
+      <div className="border-t p-4 space-y-3" style={{ borderColor: 'var(--border-light)' }}>
+      <div className="flex gap-2">
         {hasChanges && !showCommit && (
           <button
             onClick={() => setShowCommit(true)}
-            className="flex-1 px-5 py-3 text-sm text-white font-semibold transition-all hover:scale-105 active:scale-95"
+            className="flex-1 px-3 py-2 text-sm text-white font-medium transition-all"
             style={{
               background: 'var(--primary)',
-              borderRadius: 'var(--radius)',
-              boxShadow: 'var(--shadow-md)'
+              borderRadius: 'var(--radius-sm)'
             }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-hover)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary)'}
           >
-            Commit Changes
+            Commit
           </button>
         )}
         <button
           onClick={() => handleSync('pull')}
           disabled={syncing}
-          className="flex-1 px-5 py-3 text-sm font-semibold transition-all disabled:opacity-50"
+          className="flex-1 px-3 py-2 text-sm font-medium transition-all disabled:opacity-50"
           style={{
-            background: 'var(--surface)',
-            border: '2px solid var(--border)',
-            borderRadius: 'var(--radius)',
+            background: 'var(--background)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
             color: 'var(--text-primary)'
           }}
           onMouseEnter={(e) => !syncing && (e.currentTarget.style.borderColor = 'var(--primary)')}
@@ -298,11 +298,11 @@ export default function GitStatus() {
         <button
           onClick={() => handleSync('push')}
           disabled={syncing}
-          className="flex-1 px-5 py-3 text-sm font-semibold transition-all disabled:opacity-50"
+          className="flex-1 px-3 py-2 text-sm font-medium transition-all disabled:opacity-50"
           style={{
-            background: 'var(--surface)',
-            border: '2px solid var(--border)',
-            borderRadius: 'var(--radius)',
+            background: 'var(--background)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
             color: 'var(--text-primary)'
           }}
           onMouseEnter={(e) => !syncing && (e.currentTarget.style.borderColor = 'var(--primary)')}
@@ -313,29 +313,26 @@ export default function GitStatus() {
       </div>
 
       {showCommit && (
-        <div className="space-y-4 pt-5 mt-3" style={{
-          borderTop: '2px solid var(--border-light)'
-        }}>
+        <div className="space-y-3">
           <div>
             <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
               Commit Message
             </label>
             <input
               type="text"
-              placeholder="Enter your commit message..."
+              placeholder="Enter commit message..."
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
-              className="w-full px-4 py-3 transition-all focus:outline-none"
+              className="w-full px-3 py-2 text-sm transition-all focus:outline-none"
               style={{
-                background: 'var(--surface)',
-                border: '2px solid var(--border)',
-                borderRadius: 'var(--radius)',
-                color: 'var(--text-primary)',
-                fontSize: '14px'
+                background: 'var(--background)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                color: 'var(--text-primary)'
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(61, 122, 237, 0.1)';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(61, 122, 237, 0.1)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = 'var(--border)';
@@ -344,35 +341,32 @@ export default function GitStatus() {
               onKeyPress={(e) => e.key === 'Enter' && handleCommit()}
             />
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={handleCommit}
               disabled={!commitMessage.trim() || syncing}
-              className="flex-1 px-5 py-3 text-sm text-white font-semibold transition-all disabled:opacity-50 hover:scale-105 active:scale-95"
+              className="flex-1 px-3 py-2 text-sm text-white font-medium transition-all disabled:opacity-50"
               style={{
                 background: 'var(--secondary)',
-                borderRadius: 'var(--radius)',
-                boxShadow: 'var(--shadow-md)'
+                borderRadius: 'var(--radius-sm)'
               }}
             >
               ✓ Commit
             </button>
             <button
               onClick={() => { setShowCommit(false); setCommitMessage(''); }}
-              className="flex-1 px-5 py-3 text-sm font-semibold transition-all"
+              className="flex-1 px-3 py-2 text-sm font-medium transition-all"
               style={{
-                background: 'var(--surface)',
-                border: '2px solid var(--border)',
-                borderRadius: 'var(--radius)',
+                background: 'var(--background)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
                 color: 'var(--text-primary)'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.background = 'var(--background)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.background = 'var(--surface)';
               }}
             >
               × Cancel
@@ -380,6 +374,7 @@ export default function GitStatus() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

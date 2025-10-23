@@ -6,10 +6,14 @@ import Link from 'next/link';
 import FileTree from '@/components/FileTree';
 import MarkdownEditor from '@/components/MarkdownEditor';
 import GitStatus from '@/components/GitStatus';
+import NoteHistory from '@/components/NoteHistory';
+import HistoryModal from '@/components/HistoryModal';
 
 function DashboardContent() {
   const [showFileTree, setShowFileTree] = useState(true);
   const [showGitStatus, setShowGitStatus] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyCommit, setHistoryCommit] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const selectedNote = searchParams.get('note');
@@ -40,11 +44,31 @@ function DashboardContent() {
         e.stopPropagation();
         setShowGitStatus(prev => !prev);
       }
+      // Ctrl + H for History
+      if (e.ctrlKey && !e.shiftKey && e.key === 'h') {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowHistory(prev => !prev);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown, true); // Use capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [showFileTree, showGitStatus]);
+
+  const handleViewHistoryVersion = async (commit: string) => {
+    setHistoryCommit(commit);
+  };
+
+  const handleCloseHistoryModal = () => {
+    setHistoryCommit(null);
+  };
+
+  // Get file path for selected note
+  const getFilePath = (slug: string | null): string | null => {
+    if (!slug) return null;
+    return `${slug}.md`;
+  };
 
   return (
     <div className="min-h-screen flex" style={{ background: 'var(--background)' }}>
@@ -55,33 +79,55 @@ function DashboardContent() {
         </div>
       )}
 
-        {/* Note Editor/Viewer */}
-        <div className="flex-1 overflow-auto">
-          {selectedNote ? (
-            <MarkdownEditor slug={selectedNote} />
-          ) : (
-            <div className="flex items-center justify-center h-full" style={{ color: 'var(--text-muted)' }}>
-              <div className="text-center space-y-4">
-                <div className="text-6xl">📝</div>
-                <h2 className="text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Welcome to Noti
-                </h2>
-                <p className="text-lg">
-                  Select a note from the sidebar or create a new one
-                </p>
+      {/* Note Editor/Viewer */}
+      <div className="flex-1 overflow-auto">
+        {selectedNote ? (
+          <MarkdownEditor slug={selectedNote} />
+        ) : (
+          <div className="flex items-center justify-center h-full" style={{ color: 'var(--text-muted)' }}>
+            <div className="text-center space-y-4">
+              <div className="text-6xl">📝</div>
+              <h2 className="text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Welcome to Noti
+              </h2>
+              <p className="text-lg">
+                Select a note from the sidebar or create a new one
+              </p>
+              <div className="text-sm mt-4 space-y-1" style={{ color: 'var(--text-muted)' }}>
+                <p>Keyboard shortcuts:</p>
+                <p>Ctrl+B - Toggle sidebar</p>
+                <p>Ctrl+Shift+G - Toggle Git status</p>
+                <p>Ctrl+H - Toggle note history</p>
               </div>
             </div>
-          )}
+          </div>
+        )}
+      </div>
+
+      {/* History Sidebar */}
+      {showHistory && (
+        <div className="w-96 flex-shrink-0">
+          <NoteHistory
+            filePath={getFilePath(selectedNote)}
+            onViewVersion={handleViewHistoryVersion}
+          />
         </div>
+      )}
 
       {/* Git Status Sidebar */}
       {showGitStatus && (
-        <div className="w-96 flex-shrink-0 overflow-auto p-4" style={{
-          background: 'var(--background)',
-          borderLeft: '1px solid var(--border-light)'
-        }}>
+        <div className="w-96 flex-shrink-0">
           <GitStatus />
         </div>
+      )}
+
+      {/* History Modal */}
+      {historyCommit && selectedNote && (
+        <HistoryModal
+          filePath={getFilePath(selectedNote)!}
+          commitHash={historyCommit}
+          onClose={handleCloseHistoryModal}
+        />
       )}
     </div>
   );
