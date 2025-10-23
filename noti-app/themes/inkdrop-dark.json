@@ -1,0 +1,31 @@
+{
+  "name": "Inkdrop Dark",
+  "author": "Takuya Matsuyama",
+  "version": "1.0.0",
+  "description": "Default dark theme inspired by Inkdrop",
+  "type": "dark",
+  "colors": {
+    "primary": "#3d7aed",
+    "primaryHover": "#2d6add",
+    "secondary": "#7d6ae0",
+    "accent": "#ff63c3",
+    "background": "#1a1d24",
+    "surface": "#22252d",
+    "headerBg": "#1e2128",
+    "foreground": "#e8eaed",
+    "textPrimary": "#e8eaed",
+    "textSecondary": "#c4c7cc",
+    "textMuted": "#9ca3af",
+    "border": "#374151",
+    "borderLight": "#2d3748"
+  },
+  "shadows": {
+    "sm": "0 1px 3px rgba(0, 0, 0, 0.3)",
+    "md": "0 4px 6px rgba(0, 0, 0, 0.2)",
+    "lg": "0 10px 15px rgba(0, 0, 0, 0.2)"
+  },
+  "radius": {
+    "default": "1.3em",
+    "sm": "0.5em"
+  }
+}
