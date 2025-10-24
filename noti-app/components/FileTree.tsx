@@ -9,6 +9,7 @@ import TemplatePickerModal from './TemplatePickerModal';
 import FolderPickerModal from './FolderPickerModal';
 import FolderContextMenu from './FolderContextMenu';
 import NoteContextMenu from './NoteContextMenu';
+import { notesAPI, foldersAPI, templatesAPI } from '../lib/electron-api';
 
 interface NoteMetadata {
   slug: string;
@@ -89,8 +90,7 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
 
   const fetchNotes = async () => {
     try {
-      const response = await fetch('/api/notes');
-      const data = await response.json();
+      const data = await notesAPI.getAll();
       setNotes(data);
     } catch (error) {
       console.error('Error fetching notes:', error);
@@ -101,12 +101,9 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
 
   const fetchFolders = async () => {
     try {
-      const response = await fetch('/api/folders');
-      if (response.ok) {
-        const data = await response.json();
-        const folderPaths = data.map((f: any) => f.path);
-        setAllFolders(folderPaths);
-      }
+      const data = await foldersAPI.getAll();
+      const folderPaths = data.map((f: any) => f.path);
+      setAllFolders(folderPaths);
     } catch (error) {
       console.error('Error fetching folders:', error);
     }
@@ -132,16 +129,9 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
         ? `${selectedFolder}/${folderName}`
         : folderName;
 
-      const response = await fetch('/api/folders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: folderPath }),
-      });
-
-      if (response.ok) {
-        fetchFolders(); // Refresh folders to show new folder immediately
-        fetchNotes(); // Also refresh notes
-      }
+      await foldersAPI.create(folderPath);
+      fetchFolders(); // Refresh folders to show new folder immediately
+      fetchNotes(); // Also refresh notes
     } catch (error) {
       console.error('Error creating folder:', error);
     }
@@ -149,13 +139,10 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
 
   const handleSelectTemplate = async (templateSlug: string) => {
     try {
-      const response = await fetch(`/api/templates/${templateSlug}`);
-      if (response.ok) {
-        const template = await response.json();
-        const folder = selectedFolder && selectedFolder !== 'root' ? selectedFolder : '';
-        // Navigate to new note with template content
-        router.push(`/dashboard?note=new&template=${templateSlug}&folder=${folder}`);
-      }
+      const template = await templatesAPI.get(templateSlug);
+      const folder = selectedFolder && selectedFolder !== 'root' ? selectedFolder : '';
+      // Navigate to new note with template content
+      router.push(`/dashboard?note=new&template=${templateSlug}&folder=${folder}`);
     } catch (error) {
       console.error('Error loading template:', error);
     }
@@ -165,19 +152,9 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     if (!noteToMove) return;
 
     try {
-      const response = await fetch('/api/notes/move', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slug: noteToMove.slug,
-          targetFolder,
-        }),
-      });
-
-      if (response.ok) {
-        fetchNotes(); // Refresh notes
-        setNoteToMove(null);
-      }
+      await notesAPI.move(noteToMove.slug, targetFolder);
+      fetchNotes(); // Refresh notes
+      setNoteToMove(null);
     } catch (error) {
       console.error('Error moving note:', error);
     }
@@ -188,29 +165,20 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
 
     try {
       // Fetch the note content
-      const noteResponse = await fetch(`/api/notes/${noteForTemplate.slug}`);
-      if (!noteResponse.ok) return;
-
-      const note = await noteResponse.json();
+      const note = await notesAPI.get(noteForTemplate.slug);
 
       // Save as template
-      const response = await fetch('/api/templates', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slug: noteForTemplate.slug,
-          content: note.content,
-          metadata: {
-            title: noteForTemplate.title,
-            description: `Template based on ${noteForTemplate.title}`,
-          },
-        }),
+      await templatesAPI.create({
+        slug: noteForTemplate.slug,
+        content: note.content,
+        metadata: {
+          title: noteForTemplate.title,
+          description: `Template based on ${noteForTemplate.title}`,
+        },
       });
 
-      if (response.ok) {
-        alert('Note saved as template!');
-        setNoteForTemplate(null);
-      }
+      alert('Note saved as template!');
+      setNoteForTemplate(null);
     } catch (error) {
       console.error('Error saving template:', error);
     }
@@ -218,16 +186,9 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
 
   const handleRenameFolder = async (folderPath: string, newName: string) => {
     try {
-      const response = await fetch(`/api/folders/${encodeURIComponent(folderPath)}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newName }),
-      });
-
-      if (response.ok) {
-        fetchFolders();
-        fetchNotes();
-      }
+      await foldersAPI.rename(folderPath, newName);
+      fetchFolders();
+      fetchNotes();
     } catch (error) {
       console.error('Error renaming folder:', error);
     }
@@ -237,14 +198,9 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     if (!confirm(`Delete folder "${folderPath}"?`)) return;
 
     try {
-      const response = await fetch(`/api/folders/${encodeURIComponent(folderPath)}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        fetchFolders();
-        fetchNotes();
-      }
+      await foldersAPI.delete(folderPath);
+      fetchFolders();
+      fetchNotes();
     } catch (error: any) {
       alert(error.message || 'Failed to delete folder');
     }
@@ -254,13 +210,8 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     if (!confirm('Delete this note?')) return;
 
     try {
-      const response = await fetch(`/api/notes/${slug}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        fetchNotes();
-      }
+      await notesAPI.delete(slug);
+      fetchNotes();
     } catch (error) {
       console.error('Error deleting note:', error);
     }

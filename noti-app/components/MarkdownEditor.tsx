@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import { notesAPI, templatesAPI, gitAPI } from '../lib/electron-api';
 
 interface MarkdownEditorProps {
   slug: string;
@@ -48,12 +49,9 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
 
   const loadTemplate = async (templateSlug: string) => {
     try {
-      const response = await fetch(`/api/templates/${templateSlug}`);
-      if (response.ok) {
-        const template = await response.json();
-        setContent(template.content);
-        setTitle(template.title);
-      }
+      const template = await templatesAPI.get(templateSlug);
+      setContent(template.content);
+      setTitle(template.title);
     } catch (error) {
       console.error('Error loading template:', error);
     } finally {
@@ -63,19 +61,11 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
 
   const fetchNote = async () => {
     try {
-      const response = await fetch(`/api/notes/${slug}`);
-      if (response.ok) {
-        const data = await response.json();
-        setContent(data.content);
-        setOriginalContent(data.content); // Save original for diff
-        setTitle(data.title);
-        setTags(data.tags);
-      } else {
-        console.error('Failed to fetch note:', response.status, response.statusText);
-        // Set empty content so editor is still usable
-        setContent('');
-        setTitle('Note not found');
-      }
+      const data = await notesAPI.get(slug);
+      setContent(data.content);
+      setOriginalContent(data.content); // Save original for diff
+      setTitle(data.title);
+      setTags(data.tags);
     } catch (error) {
       console.error('Error fetching note:', error);
       setContent('');
@@ -88,11 +78,8 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
   const fetchDiff = async () => {
     try {
       const filePath = `${slug}.md`;
-      const response = await fetch(`/api/git/diff?file=${encodeURIComponent(filePath)}`);
-      if (response.ok) {
-        const data = await response.json();
-        return data.diff || '';
-      }
+      const data = await gitAPI.diff(filePath);
+      return data.diff || '';
     } catch (error) {
       console.error('Error fetching diff:', error);
     }
@@ -157,9 +144,6 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const endpoint = slug === 'new' ? '/api/notes' : `/api/notes/${slug}`;
-      const method = slug === 'new' ? 'POST' : 'PUT';
-
       // Generate slug with folder path if creating new note
       let noteSlug = slug;
       if (slug === 'new') {
@@ -173,21 +157,14 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
         metadata: { title, tags },
       };
 
-      const response = await fetch(endpoint, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (slug === 'new') {
-          // Navigate to the newly created note
-          router.push(`/dashboard?note=${data.slug}`);
-        } else {
-          // Update original content to reflect saved state
-          setOriginalContent(content);
-        }
+      if (slug === 'new') {
+        const data = await notesAPI.create(body);
+        // Navigate to the newly created note
+        router.push(`/dashboard?note=${data.slug}`);
+      } else {
+        await notesAPI.update(slug, body);
+        // Update original content to reflect saved state
+        setOriginalContent(content);
       }
     } catch (error) {
       console.error('Error saving note:', error);
