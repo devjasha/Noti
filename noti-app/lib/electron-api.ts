@@ -1,55 +1,7 @@
 // Electron API wrapper
 // This module provides a unified API that works in both Electron and web environments
 
-// Type definitions for the Electron API exposed via preload
-interface ElectronAPI {
-  notes: {
-    getAll: () => Promise<any>;
-    get: (slug: string) => Promise<any>;
-    create: (data: any) => Promise<any>;
-    update: (slug: string, data: any) => Promise<any>;
-    delete: (slug: string) => Promise<any>;
-    move: (slug: string, targetFolder: string) => Promise<any>;
-  };
-  folders: {
-    getAll: () => Promise<any>;
-    create: (path: string) => Promise<any>;
-    rename: (path: string, newName: string) => Promise<any>;
-    delete: (path: string) => Promise<any>;
-  };
-  templates: {
-    getAll: () => Promise<any>;
-    get: (slug: string) => Promise<any>;
-    create: (data: any) => Promise<any>;
-    delete: (slug: string) => Promise<any>;
-  };
-  themes: {
-    getAll: () => Promise<any>;
-    get: (name: string) => Promise<any>;
-    create: (data: any) => Promise<any>;
-    delete: (name: string) => Promise<any>;
-  };
-  git: {
-    status: () => Promise<any>;
-    commit: (message: string) => Promise<any>;
-    sync: (action: 'pull' | 'push') => Promise<any>;
-    diff: (file?: string) => Promise<any>;
-    history: (file: string) => Promise<any>;
-    fileVersion: (file: string, commitHash: string) => Promise<any>;
-    remotes: () => Promise<any>;
-  };
-  settings: {
-    getNotesDirectory: () => Promise<string>;
-    selectNotesDirectory: () => Promise<string | null>;
-  };
-  onNotesDirectoryChanged: (callback: (dir: string) => void) => void;
-}
-
-declare global {
-  interface Window {
-    electron?: ElectronAPI;
-  }
-}
+import type { ElectronAPI } from '../electron.d';
 
 // Check if running in Electron
 export const isElectron = typeof window !== 'undefined' && window.electron !== undefined;

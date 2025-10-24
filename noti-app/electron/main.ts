@@ -182,12 +182,14 @@ function createMenu() {
         {
           label: 'About Noti',
           click: () => {
-            dialog.showMessageBox(mainWindow, {
-              type: 'info',
-              title: 'About Noti',
-              message: 'Noti',
-              detail: `Version: ${app.getVersion()}\n\nA personal note-taking system with Git integration.`,
-            });
+            if (mainWindow) {
+              dialog.showMessageBox(mainWindow, {
+                type: 'info',
+                title: 'About Noti',
+                message: 'Noti',
+                detail: `Version: ${app.getVersion()}\n\nA personal note-taking system with Git integration.`,
+              });
+            }
           }
         }
       ]
@@ -199,6 +201,8 @@ function createMenu() {
 }
 
 async function selectNotesDirectory() {
+  if (!mainWindow) return;
+
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory', 'createDirectory'],
     title: 'Select Notes Directory',
@@ -221,7 +225,7 @@ async function selectNotesDirectory() {
       message: 'Notes directory has been updated. Please reload the application.',
       buttons: ['Reload', 'Later']
     }).then(response => {
-      if (response.response === 0) {
+      if (response.response === 0 && mainWindow) {
         mainWindow.reload();
       }
     });
@@ -233,6 +237,8 @@ async function selectNotesDirectory() {
 }
 
 async function checkForUpdates(manual = false) {
+  if (!mainWindow) return;
+
   try {
     const result = await autoUpdater.checkForUpdates();
 
@@ -287,16 +293,18 @@ async function checkForUpdates(manual = false) {
 
 // Auto-updater events
 autoUpdater.on('update-downloaded', () => {
-  dialog.showMessageBox(mainWindow, {
-    type: 'info',
-    title: 'Update Ready',
-    message: 'Update downloaded. The application will restart to install the update.',
-    buttons: ['Restart', 'Later']
-  }).then(response => {
-    if (response.response === 0) {
-      autoUpdater.quitAndInstall();
-    }
-  });
+  if (mainWindow) {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Update Ready',
+      message: 'Update downloaded. The application will restart to install the update.',
+      buttons: ['Restart', 'Later']
+    }).then(response => {
+      if (response.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
+  }
 });
 
 autoUpdater.on('error', (error) => {
@@ -311,11 +319,13 @@ ipcMain.handle('get-notes-directory', async () => {
 
   if (!notesDir) {
     // First run - prompt user to select directory
-    notesDir = await selectNotesDirectory();
-    if (!notesDir) {
+    const selectedDir = await selectNotesDirectory();
+    if (!selectedDir) {
       // User cancelled - use default
       notesDir = path.join(app.getPath('documents'), 'Noti');
       store.set('notesDirectory', notesDir);
+    } else {
+      notesDir = selectedDir;
     }
   }
 

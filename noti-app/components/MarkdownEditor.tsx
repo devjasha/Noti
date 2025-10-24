@@ -1,35 +1,61 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { notesAPI, templatesAPI, gitAPI } from '../lib/electron-api';
 import Tiptap from './TipTap';
+import { useEditorStore } from '../store/editorStore';
 
 interface MarkdownEditorProps {
   slug: string;
 }
 
-export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
+export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [content, setContent] = useState('');
-  const [title, setTitle] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [folder, setFolder] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
-  const [showPreview, setShowPreview] = useState(false);
-  const [showDiff, setShowDiff] = useState(false);
-  const [diff, setDiff] = useState<string>('');
-  const [originalContent, setOriginalContent] = useState('');
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Zustand store
+  const {
+    content,
+    title,
+    tags,
+    folder,
+    loading,
+    saving,
+    saveStatus,
+    showPreview,
+    showDiff,
+    diff,
+    originalContent,
+    slug,
+    setContent,
+    setTitle,
+    addTag,
+    removeTag,
+    setFolder,
+    setLoading,
+    setSaving,
+    setSaveStatus,
+    setShowPreview,
+    setShowDiff,
+    setDiff,
+    setOriginalContent,
+    setSlug,
+    loadNote,
+    resetNote,
+  } = useEditorStore();
+
+  // Initialize slug from props
   useEffect(() => {
-    if (slug !== 'new') {
+    setSlug(propSlug);
+  }, [propSlug, setSlug]);
+
+  useEffect(() => {
+    if (propSlug !== 'new') {
       fetchNote();
     } else {
       // New note: check for template and folder in URL params
@@ -47,7 +73,7 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
         setLoading(false);
       }
     }
-  }, [slug, searchParams]);
+  }, [propSlug, searchParams, setFolder, setLoading]);
 
   const loadTemplate = async (templateSlug: string) => {
     try {
@@ -63,23 +89,24 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
 
   const fetchNote = async () => {
     try {
-      const data = await notesAPI.get(slug);
-      setContent(data.content);
-      setOriginalContent(data.content); // Save original for diff
-      setTitle(data.title);
-      setTags(data.tags);
+      const data = await notesAPI.get(propSlug);
+      loadNote({
+        content: data.content,
+        title: data.title,
+        tags: data.tags,
+        slug: propSlug,
+      });
     } catch (error) {
       console.error('Error fetching note:', error);
       setContent('');
       setTitle('Error loading note');
-    } finally {
       setLoading(false);
     }
   };
 
   const fetchDiff = async () => {
     try {
-      const filePath = `${slug}.md`;
+      const filePath = `${propSlug}.md`;
       const data = await gitAPI.diff(filePath);
       return data.diff || '';
     } catch (error) {
@@ -93,9 +120,9 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
     const originalLines = originalContent.split('\n');
     const currentLines = content.split('\n');
 
-    let diffOutput = `diff --git a/${slug}.md b/${slug}.md\n`;
-    diffOutput += `--- a/${slug}.md\n`;
-    diffOutput += `+++ b/${slug}.md\n`;
+    let diffOutput = `diff --git a/${propSlug}.md b/${propSlug}.md\n`;
+    diffOutput += `--- a/${propSlug}.md\n`;
+    diffOutput += `+++ b/${propSlug}.md\n`;
 
     // Simple line-by-line comparison
     const maxLines = Math.max(originalLines.length, currentLines.length);
@@ -145,7 +172,7 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
 
   const handleSave = useCallback(async () => {
     // Don't save if it's a new note without a title
-    if (slug === 'new' && !title.trim()) {
+    if (propSlug === 'new' && !title.trim()) {
       return;
     }
 
@@ -154,8 +181,8 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
 
     try {
       // Generate slug with folder path if creating new note
-      let noteSlug = slug;
-      if (slug === 'new') {
+      let noteSlug = propSlug;
+      if (propSlug === 'new') {
         const baseName = title.toLowerCase().replace(/\s+/g, '-');
         noteSlug = folder ? `${folder}/${baseName}` : baseName;
       }
@@ -166,12 +193,12 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
         metadata: { title, tags },
       };
 
-      if (slug === 'new') {
+      if (propSlug === 'new') {
         const data = await notesAPI.create(body);
         // Navigate to the newly created note
         router.push(`/dashboard?note=${data.slug}`);
       } else {
-        await notesAPI.update(slug, body);
+        await notesAPI.update(propSlug, body);
         // Update original content to reflect saved state
         setOriginalContent(content);
       }
@@ -183,16 +210,16 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
     } finally {
       setSaving(false);
     }
-  }, [slug, title, folder, content, tags, router]);
+  }, [propSlug, title, folder, content, tags, router, setSaving, setSaveStatus, setOriginalContent]);
 
   // Auto-save with debounce
   useEffect(() => {
     // Skip auto-save for new notes without title or if nothing changed
-    if (slug === 'new' && !title.trim()) {
+    if (propSlug === 'new' && !title.trim()) {
       return;
     }
 
-    if (slug !== 'new' && content === originalContent && title && tags) {
+    if (propSlug !== 'new' && content === originalContent && title && tags) {
       return;
     }
 
@@ -215,7 +242,7 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [content, title, tags, slug, originalContent, handleSave]);
+  }, [content, title, tags, propSlug, originalContent, handleSave, setSaveStatus]);
 
   // Ctrl+S keyboard shortcut
   useEffect(() => {
@@ -231,13 +258,11 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
   }, [handleSave]);
 
   const handleTagAdd = (tag: string) => {
-    if (tag && !tags.includes(tag)) {
-      setTags([...tags, tag]);
-    }
+    addTag(tag);
   };
 
   const handleTagRemove = (tag: string) => {
-    setTags(tags.filter(t => t !== tag));
+    removeTag(tag);
   };
 
   const insertMarkdown = (before: string, after: string = '', placeholder: string = '') => {
@@ -258,6 +283,10 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
+
+  if (loading) {
+    return <div className="text-center py-8">Loading note...</div>;
+  }
 
   return (
     <div className="flex flex-col h-screen" style={{ background: 'var(--background)' }}>
@@ -392,7 +421,7 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
               filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3))'
             }}
           >
-            {slug !== 'new' && (
+            {propSlug !== 'new' && (
               <button
                 onClick={() => {
                   toggleDiff();
