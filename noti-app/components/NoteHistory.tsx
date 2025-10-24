@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { gitAPI } from '../lib/electron-api';
 
 interface FileCommit {
   hash: string;
@@ -35,14 +36,8 @@ export default function NoteHistory({ filePath, onViewVersion }: NoteHistoryProp
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/git/history?file=${encodeURIComponent(filePath)}`);
-      if (response.ok) {
-        const data = await response.json();
-        setHistory(data);
-      } else {
-        console.error('Failed to fetch history');
-        setHistory([]);
-      }
+      const data = await gitAPI.history(filePath);
+      setHistory(data);
     } catch (error) {
       console.error('Error fetching file history:', error);
       setHistory([]);

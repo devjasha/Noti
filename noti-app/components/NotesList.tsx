@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { notesAPI } from '../lib/electron-api';
 
 interface NoteMetadata {
   slug: string;
@@ -24,8 +25,7 @@ export default function NotesList() {
 
   const fetchNotes = async () => {
     try {
-      const response = await fetch('/api/notes');
-      const data = await response.json();
+      const data = await notesAPI.getAll();
       setNotes(data);
     } catch (error) {
       console.error('Error fetching notes:', error);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { foldersAPI } from '../lib/electron-api';
 
 interface Folder {
   name: string;
@@ -30,11 +31,8 @@ export default function FolderPickerModal({ isOpen, onClose, onSelect, currentFo
   const fetchFolders = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/folders');
-      if (response.ok) {
-        const data = await response.json();
-        setFolders(data);
-      }
+      const data = await foldersAPI.getAll();
+      setFolders(data);
     } catch (error) {
       console.error('Error fetching folders:', error);
     } finally {

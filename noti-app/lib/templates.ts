@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import matter from 'gray-matter';
-import { getNotesDir, Note } from './notes';
+import { getNotesDir, Note } from './notes.js';
 
 export interface Template {
   slug: string;

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { gitAPI } from '../lib/electron-api';
 
 interface GitStatusData {
   modified: string[];
@@ -33,12 +34,18 @@ export default function GitStatus() {
   useEffect(() => {
     fetchStatus();
     fetchRemotes();
+
+    // Poll for git status every 5 seconds to catch external changes
+    const interval = setInterval(() => {
+      fetchStatus();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchStatus = async () => {
     try {
-      const response = await fetch('/api/git/status');
-      const data = await response.json();
+      const data = await gitAPI.status();
       setStatus(data);
     } catch (error) {
       console.error('Error fetching git status:', error);
@@ -47,8 +54,7 @@ export default function GitStatus() {
 
   const fetchRemotes = async () => {
     try {
-      const response = await fetch('/api/git/remotes');
-      const data = await response.json();
+      const data = await gitAPI.remotes();
       setRemotes(data);
     } catch (error) {
       console.error('Error fetching git remotes:', error);
@@ -65,26 +71,17 @@ export default function GitStatus() {
 
     setSyncing(true);
     try {
-      const response = await fetch('/api/git/commit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: commitMessage }),
-      });
+      await gitAPI.commit(commitMessage);
+      const savedMessage = commitMessage;
+      setCommitMessage('');
+      setShowCommit(false);
+      await fetchStatus();
 
-      if (response.ok) {
-        const savedMessage = commitMessage;
-        setCommitMessage('');
-        setShowCommit(false);
-        await fetchStatus();
-
-        // If commit & push is enabled, automatically push
-        if (commitAndPush && remotes.length > 0) {
-          await handleSync('push');
-        } else {
-          showFeedback('success', 'Changes committed successfully!');
-        }
+      // If commit & push is enabled, automatically push
+      if (commitAndPush && remotes.length > 0) {
+        await handleSync('push');
       } else {
-        showFeedback('error', 'Failed to commit changes');
+        showFeedback('success', 'Changes committed successfully!');
       }
     } catch (error) {
       console.error('Error committing:', error);
@@ -97,18 +94,9 @@ export default function GitStatus() {
   const handleSync = async (action: 'pull' | 'push') => {
     setSyncing(true);
     try {
-      const response = await fetch('/api/git/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
-      });
-
-      if (response.ok) {
-        await fetchStatus();
-        showFeedback('success', `Successfully ${action === 'pull' ? 'pulled from' : 'pushed to'} remote!`);
-      } else {
-        showFeedback('error', `Failed to ${action}`);
-      }
+      await gitAPI.sync(action);
+      await fetchStatus();
+      showFeedback('success', `Successfully ${action === 'pull' ? 'pulled from' : 'pushed to'} remote!`);
     } catch (error) {
       console.error(`Error ${action}ing:`, error);
       showFeedback('error', `Error ${action}ing changes`);

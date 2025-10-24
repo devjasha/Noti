@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { getNotesDir } from './notes';
+import { getNotesDir } from './notes.js';
 
 export interface Folder {
   name: string;

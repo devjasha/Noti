@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Theme, themeToCSSVariables } from '@/lib/themes-client';
+import { themesAPI } from '../lib/electron-api';
 
 export default function ThemeSelector() {
   const [themes, setThemes] = useState<Theme[]>([]);
@@ -16,11 +17,8 @@ export default function ThemeSelector() {
 
   const fetchThemes = async () => {
     try {
-      const response = await fetch('/api/themes');
-      if (response.ok) {
-        const data = await response.json();
-        setThemes(data);
-      }
+      const data = await themesAPI.getAll();
+      setThemes(data);
     } catch (error) {
       console.error('Error fetching themes:', error);
     } finally {

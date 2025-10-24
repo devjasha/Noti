@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { templatesAPI } from '../lib/electron-api';
 
 interface Template {
   slug: string;
@@ -29,11 +30,8 @@ export default function TemplatePickerModal({ isOpen, onClose, onSelect }: Templ
   const fetchTemplates = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/templates');
-      if (response.ok) {
-        const data = await response.json();
-        setTemplates(data);
-      }
+      const data = await templatesAPI.getAll();
+      setTemplates(data);
     } catch (error) {
       console.error('Error fetching templates:', error);
     } finally {

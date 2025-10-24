@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ThemeSelector from './ThemeSelector';
+import { settingsAPI, isElectron } from '@/lib/electron-api';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,6 +10,34 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+  const [notesDirectory, setNotesDirectory] = useState<string>('');
+  const [isChangingDirectory, setIsChangingDirectory] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && isElectron) {
+      // Load current notes directory
+      settingsAPI.getNotesDirectory().then(dir => {
+        if (dir) setNotesDirectory(dir);
+      });
+    }
+  }, [isOpen]);
+
+  const handleChangeDirectory = async () => {
+    setIsChangingDirectory(true);
+    try {
+      const newDir = await settingsAPI.selectNotesDirectory();
+      if (newDir) {
+        setNotesDirectory(newDir);
+        // Reload the page to refresh all data with new directory
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error changing directory:', error);
+    } finally {
+      setIsChangingDirectory(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -65,8 +94,60 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         {/* Content */}
         <div className="flex-1 overflow-auto p-6">
           <div className="space-y-6">
+            {/* Notes Directory Section (Electron only) */}
+            {isElectron && (
+              <div>
+                <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                  Notes Directory
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                      Current Location
+                    </label>
+                    <p className="text-sm mb-3 font-mono" style={{
+                      color: 'var(--text-muted)',
+                      background: 'var(--background)',
+                      padding: '8px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border)',
+                      wordBreak: 'break-all'
+                    }}>
+                      {notesDirectory || 'Loading...'}
+                    </p>
+                    <button
+                      onClick={handleChangeDirectory}
+                      disabled={isChangingDirectory}
+                      className="px-4 py-2 text-sm font-medium transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{
+                        background: 'var(--surface)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius-sm)',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isChangingDirectory) {
+                          e.currentTarget.style.background = 'var(--background)';
+                          e.currentTarget.style.borderColor = 'var(--primary)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'var(--surface)';
+                        e.currentTarget.style.borderColor = 'var(--border)';
+                      }}
+                    >
+                      {isChangingDirectory ? 'Changing...' : 'Change Directory'}
+                    </button>
+                    <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
+                      The app will reload after changing the directory
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Theme Section */}
-            <div>
+            <div className={isElectron ? "pt-4 border-t" : ""} style={isElectron ? { borderColor: 'var(--border-light)' } : {}}>
               <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
                 Appearance
               </h3>
