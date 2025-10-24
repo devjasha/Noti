@@ -107,8 +107,10 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../out/index.html'));
   }
 
-  // Create application menu
-  createMenu();
+  // Remove the menu bar entirely (set to null)
+  // Note: On macOS, the menu will still appear in the top system bar
+  // For Windows/Linux, this removes the in-window menu bar
+  Menu.setApplicationMenu(null);
 
   // Window event handlers
   mainWindow.on('closed', () => {
