@@ -54,6 +54,16 @@ declare global {
 // Check if running in Electron
 export const isElectron = typeof window !== 'undefined' && window.electron !== undefined;
 
+// Debug: Log whether Electron API is available
+if (typeof window !== 'undefined') {
+  console.log('[electron-api] Running in browser:', typeof window !== 'undefined');
+  console.log('[electron-api] window.electron available:', window.electron !== undefined);
+  console.log('[electron-api] isElectron:', isElectron);
+  if (window.electron) {
+    console.log('[electron-api] Electron API keys:', Object.keys(window.electron));
+  }
+}
+
 // Wrapper functions that use Electron IPC if available, otherwise fall back to HTTP fetch
 
 // Notes API

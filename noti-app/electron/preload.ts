@@ -1,5 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
+console.log('[preload] Preload script is running');
+
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld('electron', {
@@ -59,3 +61,5 @@ contextBridge.exposeInMainWorld('electron', {
     ipcRenderer.on('notes-directory-changed', (event, dir) => callback(dir));
   },
 });
+
+console.log('[preload] window.electron has been exposed via contextBridge');
