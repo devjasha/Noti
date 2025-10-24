@@ -23,20 +23,19 @@ export interface NoteMetadata {
   folder: string;
 }
 
-const NOTES_DIR = process.env.NOTES_DIR || path.join(process.cwd(), '..', 'notes');
-
 /**
  * Get the absolute path to the notes directory
+ * This reads from environment variable each time to support dynamic directory changes
  */
 export function getNotesDir(): string {
-  return NOTES_DIR;
+  return process.env.NOTES_DIR || path.join(process.cwd(), '..', 'notes');
 }
 
 /**
  * Initialize git client for the notes directory
  */
 function getGit(): SimpleGit {
-  return simpleGit(NOTES_DIR);
+  return simpleGit(getNotesDir());
 }
 
 /**
@@ -62,7 +61,7 @@ async function getMarkdownFiles(dir: string, baseDir: string = dir): Promise<str
  * Parse a markdown file and extract metadata
  */
 async function parseNote(relativePath: string): Promise<Note> {
-  const fullPath = path.join(NOTES_DIR, relativePath);
+  const fullPath = path.join(getNotesDir(), relativePath);
   const fileContent = await fs.readFile(fullPath, 'utf-8');
   const { data, content } = matter(fileContent);
 
@@ -101,7 +100,7 @@ async function getNoteMetadata(relativePath: string): Promise<NoteMetadata> {
  * Get all notes metadata (excluding templates)
  */
 export async function getAllNotes(): Promise<NoteMetadata[]> {
-  const files = await getMarkdownFiles(NOTES_DIR);
+  const files = await getMarkdownFiles(getNotesDir());
   // Filter out files from .templates directory
   const noteFiles = files.filter(file => !file.startsWith('.templates'));
   const notes = await Promise.all(
@@ -133,7 +132,7 @@ export async function saveNote(
   metadata: { title?: string; tags?: string[] }
 ): Promise<Note> {
   const relativePath = `${slug}.md`.replace(/\//g, path.sep);
-  const fullPath = path.join(NOTES_DIR, relativePath);
+  const fullPath = path.join(getNotesDir(), relativePath);
 
   // Ensure directory exists
   await fs.mkdir(path.dirname(fullPath), { recursive: true });
@@ -166,7 +165,7 @@ export async function saveNote(
 export async function deleteNote(slug: string): Promise<boolean> {
   try {
     const relativePath = `${slug}.md`.replace(/\//g, path.sep);
-    const fullPath = path.join(NOTES_DIR, relativePath);
+    const fullPath = path.join(getNotesDir(), relativePath);
     await fs.unlink(fullPath);
     return true;
   } catch (error) {
@@ -247,7 +246,7 @@ export async function getDiff(staged: boolean = false) {
 
       // Read and format each untracked file as a new addition
       for (const filePath of untrackedFiles) {
-        const fullPath = path.join(NOTES_DIR, filePath);
+        const fullPath = path.join(getNotesDir(), filePath);
         try {
           const content = await fs.readFile(fullPath, 'utf-8');
           const lines = content.split('\n');
@@ -352,7 +351,7 @@ export async function getFileAtCommit(filePath: string, commitHash: string): Pro
  */
 export async function moveNote(slug: string, targetFolder: string): Promise<Note> {
   const oldRelativePath = `${slug}.md`.replace(/\//g, path.sep);
-  const oldFullPath = path.join(NOTES_DIR, oldRelativePath);
+  const oldFullPath = path.join(getNotesDir(), oldRelativePath);
 
   // Read the existing note first
   const note = await parseNote(oldRelativePath);
@@ -365,7 +364,7 @@ export async function moveNote(slug: string, targetFolder: string): Promise<Note
   const newRelativePath = targetFolder
     ? path.join(targetFolder, fileName)
     : fileName;
-  const newFullPath = path.join(NOTES_DIR, newRelativePath);
+  const newFullPath = path.join(getNotesDir(), newRelativePath);
 
   // Ensure target directory exists
   await fs.mkdir(path.dirname(newFullPath), { recursive: true });

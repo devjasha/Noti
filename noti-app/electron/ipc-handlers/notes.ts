@@ -1,12 +1,29 @@
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
 import { getAllNotes, getNote, saveNote, deleteNote } from '../../lib/notes.js';
+import fs from 'fs/promises';
+import { simpleGit } from 'simple-git';
 
 async function getNotesDirectory(store: Store): Promise<string> {
   const notesDir = store.get('notesDirectory') as string;
   if (!notesDir) {
     throw new Error('Notes directory not configured');
   }
+
+  // Ensure directory exists
+  try {
+    await fs.mkdir(notesDir, { recursive: true });
+
+    // Ensure git is initialized
+    const git = simpleGit(notesDir);
+    const isRepo = await git.checkIsRepo();
+    if (!isRepo) {
+      await git.init();
+    }
+  } catch (error) {
+    console.error('Error ensuring notes directory:', error);
+  }
+
   return notesDir;
 }
 
