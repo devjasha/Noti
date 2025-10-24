@@ -2,7 +2,8 @@ import { app, BrowserWindow, ipcMain, dialog, Menu, MenuItemConstructorOptions }
 import path from 'path';
 import fs from 'fs/promises';
 import Store from 'electron-store';
-import { autoUpdater } from 'electron-updater';
+import electronUpdater from 'electron-updater';
+const { autoUpdater } = electronUpdater;
 import { simpleGit } from 'simple-git';
 
 // Import IPC handlers
