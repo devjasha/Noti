@@ -1,10 +1,15 @@
 import { app, BrowserWindow, ipcMain, dialog, Menu, MenuItemConstructorOptions } from 'electron';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import Store from 'electron-store';
 import electronUpdater from 'electron-updater';
 const { autoUpdater } = electronUpdater;
 import { simpleGit } from 'simple-git';
+
+// ES module equivalents for __dirname and __filename
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Import IPC handlers
 import { registerNoteHandlers } from './ipc-handlers/notes.js';
