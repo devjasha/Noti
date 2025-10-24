@@ -34,6 +34,13 @@ export default function GitStatus() {
   useEffect(() => {
     fetchStatus();
     fetchRemotes();
+
+    // Poll for git status every 5 seconds to catch external changes
+    const interval = setInterval(() => {
+      fetchStatus();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchStatus = async () => {
