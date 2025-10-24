@@ -19,10 +19,7 @@ const Tiptap = ({ content, onChange }: TiptapProps) => {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit.configure({
-        // Disable default list items to avoid conflicts with TaskList
-        taskList: false,
-      }),
+      StarterKit,
       Placeholder.configure({
         placeholder: 'Start writing your note...',
       }),

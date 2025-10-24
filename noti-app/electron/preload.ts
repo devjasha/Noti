@@ -8,45 +8,45 @@ contextBridge.exposeInMainWorld('electron', {
   // Notes API
   notes: {
     getAll: () => ipcRenderer.invoke('notes:get-all'),
-    get: (slug) => ipcRenderer.invoke('notes:get', slug),
-    create: (data) => ipcRenderer.invoke('notes:create', data),
-    update: (slug, data) => ipcRenderer.invoke('notes:update', slug, data),
-    delete: (slug) => ipcRenderer.invoke('notes:delete', slug),
-    move: (slug, targetFolder) => ipcRenderer.invoke('notes:move', slug, targetFolder),
+    get: (slug: string) => ipcRenderer.invoke('notes:get', slug),
+    create: (data: any) => ipcRenderer.invoke('notes:create', data),
+    update: (slug: string, data: any) => ipcRenderer.invoke('notes:update', slug, data),
+    delete: (slug: string) => ipcRenderer.invoke('notes:delete', slug),
+    move: (slug: string, targetFolder: string) => ipcRenderer.invoke('notes:move', slug, targetFolder),
   },
 
   // Folders API
   folders: {
     getAll: () => ipcRenderer.invoke('folders:get-all'),
-    create: (path) => ipcRenderer.invoke('folders:create', path),
-    rename: (path, newName) => ipcRenderer.invoke('folders:rename', path, newName),
-    delete: (path) => ipcRenderer.invoke('folders:delete', path),
+    create: (path: string) => ipcRenderer.invoke('folders:create', path),
+    rename: (path: string, newName: string) => ipcRenderer.invoke('folders:rename', path, newName),
+    delete: (path: string) => ipcRenderer.invoke('folders:delete', path),
   },
 
   // Templates API
   templates: {
     getAll: () => ipcRenderer.invoke('templates:get-all'),
-    get: (slug) => ipcRenderer.invoke('templates:get', slug),
-    create: (data) => ipcRenderer.invoke('templates:create', data),
-    delete: (slug) => ipcRenderer.invoke('templates:delete', slug),
+    get: (slug: string) => ipcRenderer.invoke('templates:get', slug),
+    create: (data: any) => ipcRenderer.invoke('templates:create', data),
+    delete: (slug: string) => ipcRenderer.invoke('templates:delete', slug),
   },
 
   // Themes API
   themes: {
     getAll: () => ipcRenderer.invoke('themes:get-all'),
-    get: (name) => ipcRenderer.invoke('themes:get', name),
-    create: (data) => ipcRenderer.invoke('themes:create', data),
-    delete: (name) => ipcRenderer.invoke('themes:delete', name),
+    get: (name: string) => ipcRenderer.invoke('themes:get', name),
+    create: (data: any) => ipcRenderer.invoke('themes:create', data),
+    delete: (name: string) => ipcRenderer.invoke('themes:delete', name),
   },
 
   // Git API
   git: {
     status: () => ipcRenderer.invoke('git:status'),
-    commit: (message) => ipcRenderer.invoke('git:commit', message),
-    sync: (action) => ipcRenderer.invoke('git:sync', action),
-    diff: (file) => ipcRenderer.invoke('git:diff', file),
-    history: (file) => ipcRenderer.invoke('git:history', file),
-    fileVersion: (file, commitHash) => ipcRenderer.invoke('git:file-version', file, commitHash),
+    commit: (message: string) => ipcRenderer.invoke('git:commit', message),
+    sync: (action: string) => ipcRenderer.invoke('git:sync', action),
+    diff: (file: string) => ipcRenderer.invoke('git:diff', file),
+    history: (file: string) => ipcRenderer.invoke('git:history', file),
+    fileVersion: (file: string, commitHash: string) => ipcRenderer.invoke('git:file-version', file, commitHash),
     remotes: () => ipcRenderer.invoke('git:remotes'),
   },
 
@@ -57,8 +57,8 @@ contextBridge.exposeInMainWorld('electron', {
   },
 
   // Event listeners
-  onNotesDirectoryChanged: (callback) => {
-    ipcRenderer.on('notes-directory-changed', (event, dir) => callback(dir));
+  onNotesDirectoryChanged: (callback: (dir: string) => void) => {
+    ipcRenderer.on('notes-directory-changed', (_event, dir: string) => callback(dir));
   },
 });
 
