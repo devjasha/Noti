@@ -2,17 +2,18 @@
   "name": "noti-app",
   "version": "1.0.0",
   "description": "A personal note-taking system with Git integration",
-  "main": "electron-dist/electron/main.js",
+  "main": "electron/main.ts",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron . --require tsx/cjs\"",
-    "electron:build": "next build && tsc --project tsconfig.electron.json && electron-builder",
-    "electron:build:win": "next build && tsc --project tsconfig.electron.json && electron-builder --win",
-    "electron:build:mac": "next build && tsc --project tsconfig.electron.json && electron-builder --mac",
-    "electron:build:linux": "next build && tsc --project tsconfig.electron.json && electron-builder --linux"
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && cross-env NODE_OPTIONS='--require tsx/cjs' electron .\"",
+    "electron:compile": "tsc --project tsconfig.electron.json",
+    "electron:build": "next build && npm run electron:compile && electron-builder",
+    "electron:build:win": "next build && npm run electron:compile && electron-builder --win",
+    "electron:build:mac": "next build && npm run electron:compile && electron-builder --mac",
+    "electron:build:linux": "next build && npm run electron:compile && electron-builder --linux"
   },
   "keywords": [
     "notes",
@@ -34,6 +35,9 @@
       "package.json",
       "themes/**/*"
     ],
+    "extraMetadata": {
+      "main": "electron-dist/electron/main.js"
+    },
     "win": {
       "target": [
         "nsis"
@@ -83,8 +87,10 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.15",
     "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
     "electron": "^38.4.0",
     "electron-builder": "^26.0.12",
+    "electron-vite": "^4.0.1",
     "tsx": "^4.20.6",
     "wait-on": "^9.0.1"
   }
