@@ -8,6 +8,7 @@ import MarkdownEditor from '@/components/MarkdownEditor';
 import GitStatus from '@/components/GitStatus';
 import NoteHistory from '@/components/NoteHistory';
 import HistoryModal from '@/components/HistoryModal';
+import { settingsAPI } from '@/lib/electron-api';
 
 function DashboardContent() {
   const [showFileTree, setShowFileTree] = useState(true);
@@ -17,6 +18,22 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const selectedNote = searchParams.get('note');
+
+  // Initialize notes directory on first load (Electron only)
+  useEffect(() => {
+    const initializeNotesDirectory = async () => {
+      try {
+        const notesDir = await settingsAPI.getNotesDirectory();
+        if (notesDir) {
+          console.log('[dashboard] Notes directory initialized:', notesDir);
+        }
+      } catch (error) {
+        console.error('[dashboard] Error initializing notes directory:', error);
+      }
+    };
+
+    initializeNotesDirectory();
+  }, []);
 
   const handleNoteSelect = (slug: string) => {
     router.push(`/dashboard?note=${slug}`);
