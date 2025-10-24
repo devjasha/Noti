@@ -1,7 +1,9 @@
 import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
 import path from 'path';
+import fs from 'fs/promises';
 import Store from 'electron-store';
 import { autoUpdater } from 'electron-updater';
+import { simpleGit } from 'simple-git';
 
 // Import IPC handlers
 import { registerNoteHandlers } from './ipc-handlers/notes';
@@ -13,11 +15,63 @@ import { registerGitHandlers } from './ipc-handlers/git';
 const store = new Store();
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
-let mainWindow;
+let mainWindow: BrowserWindow | null;
 
 // Auto-updater configuration
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
+
+async function ensureNotesDirectoryInitialized(notesDir: string) {
+  try {
+    // Ensure directory exists
+    await fs.mkdir(notesDir, { recursive: true });
+
+    const git = simpleGit(notesDir);
+
+    // Check if it's already a git repository
+    const isRepo = await git.checkIsRepo();
+
+    if (!isRepo) {
+      console.log('Initializing git repository in:', notesDir);
+      await git.init();
+
+      // Create a README if directory is empty
+      try {
+        const files = await fs.readdir(notesDir);
+        if (files.length === 1 && files[0] === '.git') {
+          const readmePath = path.join(notesDir, 'README.md');
+          await fs.writeFile(readmePath, '# My Notes\n\nWelcome to Noti!\n');
+          await git.add('README.md');
+          await git.commit('Initial commit');
+        }
+      } catch (error) {
+        console.error('Error creating initial files:', error);
+      }
+    }
+
+    // Ensure git user is configured (use global config if available)
+    try {
+      const config = await git.listConfig();
+      const hasUserName = config.all['user.name'];
+      const hasUserEmail = config.all['user.email'];
+
+      if (!hasUserName || !hasUserEmail) {
+        console.log('Git user not configured, using defaults');
+        if (!hasUserName) {
+          await git.addConfig('user.name', 'Noti User', false, 'global');
+        }
+        if (!hasUserEmail) {
+          await git.addConfig('user.email', 'user@noti.local', false, 'global');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking git config:', error);
+    }
+  } catch (error) {
+    console.error('Error initializing notes directory:', error);
+    throw error;
+  }
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -240,7 +294,7 @@ autoUpdater.on('error', (error) => {
 
 // Notes directory setup
 ipcMain.handle('get-notes-directory', async () => {
-  let notesDir = store.get('notesDirectory');
+  let notesDir = store.get('notesDirectory') as string;
 
   if (!notesDir) {
     // First run - prompt user to select directory
@@ -251,6 +305,9 @@ ipcMain.handle('get-notes-directory', async () => {
       store.set('notesDirectory', notesDir);
     }
   }
+
+  // Ensure directory exists and is initialized
+  await ensureNotesDirectoryInitialized(notesDir);
 
   return notesDir;
 });
