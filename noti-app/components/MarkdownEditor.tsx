@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -12,10 +12,12 @@ interface MarkdownEditorProps {
 
 export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+  const [folder, setFolder] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -27,9 +29,37 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
     if (slug !== 'new') {
       fetchNote();
     } else {
+      // New note: check for template and folder in URL params
+      const templateSlug = searchParams.get('template');
+      const folderParam = searchParams.get('folder');
+
+      // Set folder even if it's empty string (means root folder)
+      if (folderParam !== null) {
+        setFolder(folderParam);
+      }
+
+      if (templateSlug) {
+        loadTemplate(templateSlug);
+      } else {
+        setLoading(false);
+      }
+    }
+  }, [slug, searchParams]);
+
+  const loadTemplate = async (templateSlug: string) => {
+    try {
+      const response = await fetch(`/api/templates/${templateSlug}`);
+      if (response.ok) {
+        const template = await response.json();
+        setContent(template.content);
+        setTitle(template.title);
+      }
+    } catch (error) {
+      console.error('Error loading template:', error);
+    } finally {
       setLoading(false);
     }
-  }, [slug]);
+  };
 
   const fetchNote = async () => {
     try {
@@ -40,9 +70,16 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
         setOriginalContent(data.content); // Save original for diff
         setTitle(data.title);
         setTags(data.tags);
+      } else {
+        console.error('Failed to fetch note:', response.status, response.statusText);
+        // Set empty content so editor is still usable
+        setContent('');
+        setTitle('Note not found');
       }
     } catch (error) {
       console.error('Error fetching note:', error);
+      setContent('');
+      setTitle('Error loading note');
     } finally {
       setLoading(false);
     }
@@ -123,8 +160,15 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
       const endpoint = slug === 'new' ? '/api/notes' : `/api/notes/${slug}`;
       const method = slug === 'new' ? 'POST' : 'PUT';
 
+      // Generate slug with folder path if creating new note
+      let noteSlug = slug;
+      if (slug === 'new') {
+        const baseName = title.toLowerCase().replace(/\s+/g, '-');
+        noteSlug = folder ? `${folder}/${baseName}` : baseName;
+      }
+
       const body = {
-        slug: slug === 'new' ? title.toLowerCase().replace(/\s+/g, '-') : slug,
+        slug: noteSlug,
         content,
         metadata: { title, tags },
       };
@@ -138,7 +182,11 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
       if (response.ok) {
         const data = await response.json();
         if (slug === 'new') {
-          router.push(`/note/${data.slug}`);
+          // Navigate to the newly created note
+          router.push(`/dashboard?note=${data.slug}`);
+        } else {
+          // Update original content to reflect saved state
+          setOriginalContent(content);
         }
       }
     } catch (error) {

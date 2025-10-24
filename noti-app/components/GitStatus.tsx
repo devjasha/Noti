@@ -17,6 +17,8 @@ interface GitRemote {
   };
 }
 
+type FeedbackType = 'success' | 'error' | null;
+
 export default function GitStatus() {
   const [status, setStatus] = useState<GitStatusData | null>(null);
   const [remotes, setRemotes] = useState<GitRemote[]>([]);
@@ -24,7 +26,9 @@ export default function GitStatus() {
   const [commitMessage, setCommitMessage] = useState('');
   const [showCommit, setShowCommit] = useState(false);
   const [showRemotes, setShowRemotes] = useState(false);
-  const [showFiles, setShowFiles] = useState(false);
+  const [showFiles, setShowFiles] = useState(true); // Default to expanded
+  const [feedback, setFeedback] = useState<{ type: FeedbackType; message: string } | null>(null);
+  const [commitAndPush, setCommitAndPush] = useState(false);
 
   useEffect(() => {
     fetchStatus();
@@ -51,23 +55,40 @@ export default function GitStatus() {
     }
   };
 
+  const showFeedback = (type: FeedbackType, message: string) => {
+    setFeedback({ type, message });
+    setTimeout(() => setFeedback(null), 3000);
+  };
 
   const handleCommit = async () => {
     if (!commitMessage.trim()) return;
 
     setSyncing(true);
     try {
-      await fetch('/api/git/commit', {
+      const response = await fetch('/api/git/commit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: commitMessage }),
       });
-      setCommitMessage('');
-      setShowCommit(false);
-      setShowFiles(false);
-      await fetchStatus();
+
+      if (response.ok) {
+        const savedMessage = commitMessage;
+        setCommitMessage('');
+        setShowCommit(false);
+        await fetchStatus();
+
+        // If commit & push is enabled, automatically push
+        if (commitAndPush && remotes.length > 0) {
+          await handleSync('push');
+        } else {
+          showFeedback('success', 'Changes committed successfully!');
+        }
+      } else {
+        showFeedback('error', 'Failed to commit changes');
+      }
     } catch (error) {
       console.error('Error committing:', error);
+      showFeedback('error', 'Error committing changes');
     } finally {
       setSyncing(false);
     }
@@ -76,14 +97,21 @@ export default function GitStatus() {
   const handleSync = async (action: 'pull' | 'push') => {
     setSyncing(true);
     try {
-      await fetch('/api/git/sync', {
+      const response = await fetch('/api/git/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
       });
-      await fetchStatus();
+
+      if (response.ok) {
+        await fetchStatus();
+        showFeedback('success', `Successfully ${action === 'pull' ? 'pulled from' : 'pushed to'} remote!`);
+      } else {
+        showFeedback('error', `Failed to ${action}`);
+      }
     } catch (error) {
       console.error(`Error ${action}ing:`, error);
+      showFeedback('error', `Error ${action}ing changes`);
     } finally {
       setSyncing(false);
     }
@@ -110,6 +138,21 @@ export default function GitStatus() {
           {status.current}
         </span>
       </div>
+
+      {/* Feedback notification */}
+      {feedback && (
+        <div
+          className="mx-4 mt-4 p-3 rounded-lg text-sm font-medium flex items-center gap-2 transition-all"
+          style={{
+            background: feedback.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            border: `1px solid ${feedback.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+            color: feedback.type === 'success' ? '#10b981' : '#ef4444'
+          }}
+        >
+          <span>{feedback.type === 'success' ? '✓' : '✕'}</span>
+          <span>{feedback.message}</span>
+        </div>
+      )}
 
       <div className="flex-1 overflow-auto p-4 space-y-4">
       {remotes.length > 0 && (
@@ -318,12 +361,12 @@ export default function GitStatus() {
             <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
               Commit Message
             </label>
-            <input
-              type="text"
+            <textarea
               placeholder="Enter commit message..."
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
-              className="w-full px-3 py-2 text-sm transition-all focus:outline-none"
+              rows={2}
+              className="w-full px-3 py-2 text-sm transition-all focus:outline-none resize-none"
               style={{
                 background: 'var(--background)',
                 border: '1px solid var(--border)',
@@ -338,36 +381,61 @@ export default function GitStatus() {
                 e.currentTarget.style.borderColor = 'var(--border)';
                 e.currentTarget.style.boxShadow = 'none';
               }}
-              onKeyPress={(e) => e.key === 'Enter' && handleCommit()}
+              autoFocus
             />
           </div>
+
+          {remotes.length > 0 && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={commitAndPush}
+                onChange={(e) => setCommitAndPush(e.target.checked)}
+                className="w-4 h-4 cursor-pointer"
+                style={{ accentColor: 'var(--primary)' }}
+              />
+              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                Automatically push after commit
+              </span>
+            </label>
+          )}
+
           <div className="flex gap-2">
             <button
               onClick={handleCommit}
               disabled={!commitMessage.trim() || syncing}
-              className="flex-1 px-3 py-2 text-sm text-white font-medium transition-all disabled:opacity-50"
+              className="flex-1 px-3 py-2.5 text-sm text-white font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               style={{
-                background: 'var(--secondary)',
+                background: commitAndPush ? 'var(--primary)' : 'var(--secondary)',
                 borderRadius: 'var(--radius-sm)'
               }}
+              onMouseEnter={(e) => !syncing && (e.currentTarget.style.transform = 'scale(1.02)')}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
             >
-              ✓ Commit
+              {syncing ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  <span>{commitAndPush ? 'Committing & Pushing...' : 'Committing...'}</span>
+                </>
+              ) : (
+                <>
+                  <span>✓</span>
+                  <span>{commitAndPush ? 'Commit & Push' : 'Commit'}</span>
+                </>
+              )}
             </button>
             <button
-              onClick={() => { setShowCommit(false); setCommitMessage(''); }}
-              className="flex-1 px-3 py-2 text-sm font-medium transition-all"
+              onClick={() => { setShowCommit(false); setCommitMessage(''); setCommitAndPush(false); }}
+              disabled={syncing}
+              className="px-4 py-2.5 text-sm font-medium transition-all disabled:opacity-50"
               style={{
                 background: 'var(--background)',
                 border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-sm)',
                 color: 'var(--text-primary)'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--primary)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border)';
-              }}
+              onMouseEnter={(e) => !syncing && (e.currentTarget.style.borderColor = 'var(--primary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
             >
               × Cancel
             </button>

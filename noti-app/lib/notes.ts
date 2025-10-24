@@ -98,12 +98,14 @@ async function getNoteMetadata(relativePath: string): Promise<NoteMetadata> {
 }
 
 /**
- * Get all notes metadata
+ * Get all notes metadata (excluding templates)
  */
 export async function getAllNotes(): Promise<NoteMetadata[]> {
   const files = await getMarkdownFiles(NOTES_DIR);
+  // Filter out files from .templates directory
+  const noteFiles = files.filter(file => !file.startsWith('.templates'));
   const notes = await Promise.all(
-    files.map(file => getNoteMetadata(file))
+    noteFiles.map(file => getNoteMetadata(file))
   );
   return notes.sort((a, b) =>
     new Date(b.modified).getTime() - new Date(a.modified).getTime()
@@ -343,4 +345,34 @@ export async function getFileAtCommit(filePath: string, commitHash: string): Pro
     console.error(`Error getting file at commit ${commitHash}:`, error);
     return null;
   }
+}
+
+/**
+ * Move a note to a different folder
+ */
+export async function moveNote(slug: string, targetFolder: string): Promise<Note> {
+  const oldRelativePath = `${slug}.md`.replace(/\//g, path.sep);
+  const oldFullPath = path.join(NOTES_DIR, oldRelativePath);
+
+  // Read the existing note first
+  const note = await parseNote(oldRelativePath);
+  if (!note) {
+    throw new Error('Note not found');
+  }
+
+  // Calculate new path
+  const fileName = path.basename(slug) + '.md';
+  const newRelativePath = targetFolder
+    ? path.join(targetFolder, fileName)
+    : fileName;
+  const newFullPath = path.join(NOTES_DIR, newRelativePath);
+
+  // Ensure target directory exists
+  await fs.mkdir(path.dirname(newFullPath), { recursive: true });
+
+  // Move the file (preserves git history better than copy + delete)
+  await fs.rename(oldFullPath, newFullPath);
+
+  // Return the note with updated slug and folder
+  return parseNote(newRelativePath);
 }

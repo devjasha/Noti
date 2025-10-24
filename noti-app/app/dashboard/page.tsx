@@ -71,18 +71,18 @@ function DashboardContent() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'var(--background)' }}>
+    <div className="h-screen flex overflow-hidden" style={{ background: 'var(--background)' }}>
       {/* File Tree Sidebar */}
       {showFileTree && (
-        <div className="w-64 flex-shrink-0 overflow-hidden">
+        <div className="w-64 flex-shrink-0 h-full overflow-hidden">
           <FileTree selectedNote={selectedNote || undefined} onNoteSelect={handleNoteSelect} />
         </div>
       )}
 
       {/* Note Editor/Viewer */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 h-full overflow-hidden">
         {selectedNote ? (
-          <MarkdownEditor slug={selectedNote} />
+          <MarkdownEditor key={selectedNote} slug={selectedNote} />
         ) : (
           <div className="flex items-center justify-center h-full" style={{ color: 'var(--text-muted)' }}>
             <div className="text-center space-y-4">
@@ -106,7 +106,7 @@ function DashboardContent() {
 
       {/* History Sidebar */}
       {showHistory && (
-        <div className="w-96 flex-shrink-0">
+        <div className="w-96 flex-shrink-0 h-full overflow-hidden">
           <NoteHistory
             filePath={getFilePath(selectedNote)}
             onViewVersion={handleViewHistoryVersion}
@@ -116,7 +116,7 @@ function DashboardContent() {
 
       {/* Git Status Sidebar */}
       {showGitStatus && (
-        <div className="w-96 flex-shrink-0">
+        <div className="w-96 flex-shrink-0 h-full overflow-hidden">
           <GitStatus />
         </div>
       )}

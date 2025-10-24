@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import SettingsModal from './SettingsModal';
+import CreateFolderModal from './CreateFolderModal';
+import TemplatePickerModal from './TemplatePickerModal';
+import FolderPickerModal from './FolderPickerModal';
+import FolderContextMenu from './FolderContextMenu';
+import NoteContextMenu from './NoteContextMenu';
 
 interface NoteMetadata {
   slug: string;
@@ -19,15 +25,67 @@ interface FileTreeProps {
 }
 
 export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) {
+  const router = useRouter();
   const [notes, setNotes] = useState<NoteMetadata[]>([]);
+  const [allFolders, setAllFolders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['root']));
   const [filter, setFilter] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [showFolderPicker, setShowFolderPicker] = useState(false);
+  const [showNewNoteMenu, setShowNewNoteMenu] = useState(false);
+  const [selectedFolder, setSelectedFolder] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('selectedFolder') || 'root';
+    }
+    return 'root';
+  });
+  const [contextMenu, setContextMenu] = useState<{
+    type: 'folder' | 'note';
+    x: number;
+    y: number;
+    data: any;
+  } | null>(null);
+  const [noteToMove, setNoteToMove] = useState<{ slug: string; currentFolder: string } | null>(null);
+  const [noteForTemplate, setNoteForTemplate] = useState<{ slug: string; title: string } | null>(null);
 
   useEffect(() => {
     fetchNotes();
+    fetchFolders();
   }, []);
+
+  // Refresh notes list when selectedNote changes (e.g., after creating a new note)
+  useEffect(() => {
+    if (selectedNote && selectedNote !== 'new') {
+      // Check if this note exists in our current notes list
+      const noteExists = notes.find(n => n.slug === selectedNote);
+      if (!noteExists && notes.length > 0) {
+        // Note doesn't exist in list, refresh to get the newly created note
+        fetchNotes();
+      }
+    }
+  }, [selectedNote]);
+
+  // When selectedNote changes, update selectedFolder to match the note's folder
+  useEffect(() => {
+    if (selectedNote && notes.length > 0) {
+      const note = notes.find(n => n.slug === selectedNote);
+      if (note) {
+        const noteFolder = note.folder || 'root';
+        setSelectedFolder(noteFolder);
+        localStorage.setItem('selectedFolder', noteFolder);
+
+        // Also expand the folder to show the note
+        setExpandedFolders(prev => {
+          const newSet = new Set(prev);
+          newSet.add(noteFolder);
+          return newSet;
+        });
+      }
+    }
+  }, [selectedNote, notes]);
 
   const fetchNotes = async () => {
     try {
@@ -41,6 +99,19 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     }
   };
 
+  const fetchFolders = async () => {
+    try {
+      const response = await fetch('/api/folders');
+      if (response.ok) {
+        const data = await response.json();
+        const folderPaths = data.map((f: any) => f.path);
+        setAllFolders(folderPaths);
+      }
+    } catch (error) {
+      console.error('Error fetching folders:', error);
+    }
+  };
+
   const toggleFolder = (folder: string) => {
     setExpandedFolders(prev => {
       const newSet = new Set(prev);
@@ -51,6 +122,148 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
       }
       return newSet;
     });
+    setSelectedFolder(folder); // Track selected folder
+    localStorage.setItem('selectedFolder', folder); // Persist selected folder
+  };
+
+  const handleCreateFolder = async (folderName: string) => {
+    try {
+      const folderPath = selectedFolder && selectedFolder !== 'root'
+        ? `${selectedFolder}/${folderName}`
+        : folderName;
+
+      const response = await fetch('/api/folders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: folderPath }),
+      });
+
+      if (response.ok) {
+        fetchFolders(); // Refresh folders to show new folder immediately
+        fetchNotes(); // Also refresh notes
+      }
+    } catch (error) {
+      console.error('Error creating folder:', error);
+    }
+  };
+
+  const handleSelectTemplate = async (templateSlug: string) => {
+    try {
+      const response = await fetch(`/api/templates/${templateSlug}`);
+      if (response.ok) {
+        const template = await response.json();
+        const folder = selectedFolder && selectedFolder !== 'root' ? selectedFolder : '';
+        // Navigate to new note with template content
+        router.push(`/dashboard?note=new&template=${templateSlug}&folder=${folder}`);
+      }
+    } catch (error) {
+      console.error('Error loading template:', error);
+    }
+  };
+
+  const handleMoveNote = async (targetFolder: string) => {
+    if (!noteToMove) return;
+
+    try {
+      const response = await fetch('/api/notes/move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug: noteToMove.slug,
+          targetFolder,
+        }),
+      });
+
+      if (response.ok) {
+        fetchNotes(); // Refresh notes
+        setNoteToMove(null);
+      }
+    } catch (error) {
+      console.error('Error moving note:', error);
+    }
+  };
+
+  const handleSaveAsTemplate = async () => {
+    if (!noteForTemplate) return;
+
+    try {
+      // Fetch the note content
+      const noteResponse = await fetch(`/api/notes/${noteForTemplate.slug}`);
+      if (!noteResponse.ok) return;
+
+      const note = await noteResponse.json();
+
+      // Save as template
+      const response = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug: noteForTemplate.slug,
+          content: note.content,
+          metadata: {
+            title: noteForTemplate.title,
+            description: `Template based on ${noteForTemplate.title}`,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        alert('Note saved as template!');
+        setNoteForTemplate(null);
+      }
+    } catch (error) {
+      console.error('Error saving template:', error);
+    }
+  };
+
+  const handleRenameFolder = async (folderPath: string, newName: string) => {
+    try {
+      const response = await fetch(`/api/folders/${encodeURIComponent(folderPath)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newName }),
+      });
+
+      if (response.ok) {
+        fetchFolders();
+        fetchNotes();
+      }
+    } catch (error) {
+      console.error('Error renaming folder:', error);
+    }
+  };
+
+  const handleDeleteFolder = async (folderPath: string) => {
+    if (!confirm(`Delete folder "${folderPath}"?`)) return;
+
+    try {
+      const response = await fetch(`/api/folders/${encodeURIComponent(folderPath)}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        fetchFolders();
+        fetchNotes();
+      }
+    } catch (error: any) {
+      alert(error.message || 'Failed to delete folder');
+    }
+  };
+
+  const handleDeleteNote = async (slug: string) => {
+    if (!confirm('Delete this note?')) return;
+
+    try {
+      const response = await fetch(`/api/notes/${slug}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        fetchNotes();
+      }
+    } catch (error) {
+      console.error('Error deleting note:', error);
+    }
   };
 
   // Group notes by folder
@@ -61,13 +274,26 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     return acc;
   }, {} as Record<string, NoteMetadata[]>);
 
+  // Add empty folders from allFolders
+  allFolders.forEach(folderPath => {
+    if (!notesByFolder[folderPath]) {
+      notesByFolder[folderPath] = [];
+    }
+  });
+
+  // Ensure root folder exists
+  if (!notesByFolder['root']) {
+    notesByFolder['root'] = [];
+  }
+
   // Filter notes
   const filteredNotesByFolder = Object.entries(notesByFolder).reduce((acc, [folder, folderNotes]) => {
     const filtered = folderNotes.filter(note =>
       note.title.toLowerCase().includes(filter.toLowerCase()) ||
       note.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase()))
     );
-    if (filtered.length > 0) {
+    // Include folder even if empty (no filter applied) or has filtered notes
+    if (!filter || filtered.length > 0 || folderNotes.length === 0) {
       acc[folder] = filtered;
     }
     return acc;
@@ -90,21 +316,92 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     }}>
       {/* Search & New Note */}
       <div className="p-4 space-y-3 border-b" style={{ borderColor: 'var(--border-light)' }}>
-        <Link
-          href="/note/new"
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-white font-semibold transition-all hover:scale-105 active:scale-95 hover:brightness-110"
-          style={{
-            background: 'var(--primary)',
-            borderRadius: 'var(--radius-sm)',
-            boxShadow: 'var(--shadow-sm)'
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          <span>New Note</span>
-        </Link>
+        <div className="flex gap-2">
+          {/* New Note Dropdown */}
+          <div className="flex-1 relative">
+            <button
+              onClick={() => {
+                const folder = selectedFolder && selectedFolder !== 'root' ? selectedFolder : '';
+                router.push(`/dashboard?note=new&folder=${folder}`);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-white font-semibold transition-all hover:scale-105 active:scale-95 hover:brightness-110"
+              style={{
+                background: 'var(--primary)',
+                borderRadius: 'var(--radius-sm)',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <span>New Note</span>
+            </button>
+            <button
+              onClick={() => setShowNewNoteMenu(!showNewNoteMenu)}
+              className="absolute right-0 top-0 h-full px-2 text-white transition-all hover:brightness-110"
+              style={{
+                background: 'var(--primary)',
+                borderLeft: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '0 var(--radius-sm) var(--radius-sm) 0'
+              }}
+            >
+              <span className="text-xs">{showNewNoteMenu ? '▲' : '▼'}</span>
+            </button>
+
+            {/* Dropdown Menu */}
+            {showNewNoteMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setShowNewNoteMenu(false)}
+                />
+                <div
+                  className="absolute top-full left-0 right-0 mt-1 py-1 z-20 rounded"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-light)',
+                    boxShadow: 'var(--shadow-lg)'
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setShowTemplatePicker(true);
+                      setShowNewNoteMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm transition-colors"
+                    style={{ color: 'var(--text-primary)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--background)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    📄 From Template...
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* New Folder Button */}
+          <button
+            onClick={() => setShowCreateFolder(true)}
+            className="px-3 py-2.5 text-sm font-semibold transition-all hover:scale-105 active:scale-95"
+            style={{
+              background: 'var(--background)',
+              border: '2px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text-primary)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+            title="New Folder"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              <line x1="12" y1="11" x2="12" y2="17"/>
+              <line x1="9" y1="14" x2="15" y2="14"/>
+            </svg>
+          </button>
+        </div>
         <input
           type="text"
           placeholder="Search notes..."
@@ -141,14 +438,44 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
                 {/* Folder Header */}
                 <button
                   onClick={() => toggleFolder(folder)}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    setContextMenu({
+                      type: 'folder',
+                      x: e.clientX,
+                      y: e.clientY,
+                      data: {
+                        path: folder === 'root' ? '' : folder,
+                        name: folder,
+                        isEmpty: filteredNotesByFolder[folder].length === 0
+                      }
+                    });
+                  }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium transition-colors rounded"
-                  style={{ color: 'var(--text-primary)' }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--background)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  style={{
+                    color: 'var(--text-primary)',
+                    background: selectedFolder === folder ? 'rgba(61, 122, 237, 0.1)' : 'transparent',
+                    borderLeft: selectedFolder === folder ? '3px solid var(--primary)' : '3px solid transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedFolder !== folder) {
+                      e.currentTarget.style.background = 'var(--background)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedFolder !== folder) {
+                      e.currentTarget.style.background = 'transparent';
+                    }
+                  }}
                 >
                   <span className="text-xs">{expandedFolders.has(folder) ? '▼' : '▶'}</span>
                   <span>📁</span>
-                  <span>{folder}</span>
+                  <span style={{
+                    fontWeight: selectedFolder === folder ? 600 : 400,
+                    color: selectedFolder === folder ? 'var(--primary)' : 'inherit'
+                  }}>
+                    {folder}
+                  </span>
                   <span className="ml-auto text-xs" style={{ color: 'var(--text-muted)' }}>
                     {filteredNotesByFolder[folder].length}
                   </span>
@@ -164,10 +491,28 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
                           key={note.slug}
                           href={`/dashboard?note=${note.slug}`}
                           onClick={(e) => {
+                            // Select the folder that contains this note
+                            const noteFolder = note.folder || 'root';
+                            setSelectedFolder(noteFolder);
+                            localStorage.setItem('selectedFolder', noteFolder);
+
                             if (onNoteSelect) {
                               e.preventDefault();
                               onNoteSelect(note.slug);
                             }
+                          }}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            setContextMenu({
+                              type: 'note',
+                              x: e.clientX,
+                              y: e.clientY,
+                              data: {
+                                slug: note.slug,
+                                title: note.title,
+                                folder: note.folder
+                              }
+                            });
                           }}
                           className="block px-3 py-2 text-sm rounded transition-all"
                           style={{
@@ -248,8 +593,78 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
         </button>
       </div>
 
-      {/* Settings Modal */}
+      {/* Modals */}
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <CreateFolderModal
+        isOpen={showCreateFolder}
+        onClose={() => setShowCreateFolder(false)}
+        onSubmit={handleCreateFolder}
+        parentFolder={selectedFolder !== 'root' ? selectedFolder : undefined}
+      />
+      <TemplatePickerModal
+        isOpen={showTemplatePicker}
+        onClose={() => setShowTemplatePicker(false)}
+        onSelect={handleSelectTemplate}
+      />
+      <FolderPickerModal
+        isOpen={showFolderPicker}
+        onClose={() => setShowFolderPicker(false)}
+        onSelect={handleMoveNote}
+        currentFolder={noteToMove?.currentFolder}
+      />
+
+      {/* Context Menus */}
+      {contextMenu && contextMenu.type === 'folder' && (
+        <FolderContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          folderPath={contextMenu.data.path}
+          folderName={contextMenu.data.name}
+          isEmpty={contextMenu.data.isEmpty}
+          onClose={() => setContextMenu(null)}
+          onRename={() => {
+            const newName = prompt('Enter new folder name:', contextMenu.data.name);
+            if (newName && newName !== contextMenu.data.name) {
+              handleRenameFolder(contextMenu.data.path, newName);
+            }
+          }}
+          onDelete={() => {
+            handleDeleteFolder(contextMenu.data.path);
+          }}
+          onCreateNote={() => {
+            setSelectedFolder(contextMenu.data.name);
+            const folder = contextMenu.data.path;
+            router.push(`/dashboard?note=new&folder=${folder}`);
+          }}
+        />
+      )}
+
+      {contextMenu && contextMenu.type === 'note' && (
+        <NoteContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          noteSlug={contextMenu.data.slug}
+          noteTitle={contextMenu.data.title}
+          onClose={() => setContextMenu(null)}
+          onMove={() => {
+            setNoteToMove({
+              slug: contextMenu.data.slug,
+              currentFolder: contextMenu.data.folder
+            });
+            setShowFolderPicker(true);
+          }}
+          onSaveAsTemplate={() => {
+            setNoteForTemplate({
+              slug: contextMenu.data.slug,
+              title: contextMenu.data.title
+            });
+            handleSaveAsTemplate();
+          }}
+          onDelete={() => {
+            handleDeleteNote(contextMenu.data.slug);
+          }}
+        />
+      )}
     </div>
   );
 }
