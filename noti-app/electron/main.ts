@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, Menu, MenuItemConstructorOptions } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
 import Store from 'electron-store';
@@ -6,11 +6,11 @@ import { autoUpdater } from 'electron-updater';
 import { simpleGit } from 'simple-git';
 
 // Import IPC handlers
-import { registerNoteHandlers } from './ipc-handlers/notes';
-import { registerFolderHandlers } from './ipc-handlers/folders';
-import { registerTemplateHandlers } from './ipc-handlers/templates';
-import { registerThemeHandlers } from './ipc-handlers/themes';
-import { registerGitHandlers } from './ipc-handlers/git';
+import { registerNoteHandlers } from './ipc-handlers/notes.js';
+import { registerFolderHandlers } from './ipc-handlers/folders.js';
+import { registerTemplateHandlers } from './ipc-handlers/templates.js';
+import { registerThemeHandlers } from './ipc-handlers/themes.js';
+import { registerGitHandlers } from './ipc-handlers/git.js';
 
 const store = new Store();
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
@@ -111,7 +111,7 @@ function createWindow() {
 }
 
 function createMenu() {
-  const template = [
+  const template: MenuItemConstructorOptions[] = [
     {
       label: 'File',
       submenu: [

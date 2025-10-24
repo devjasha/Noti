@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
-import { getFolders, createFolder, renameFolder, deleteFolder } from '../../lib/folders';
+import { getAllFolders, createFolder, renameFolder, deleteFolder } from '../../lib/folders.js';
 
 async function getNotesDirectory(store: Store): Promise<string> {
   const notesDir = store.get('notesDirectory') as string;
@@ -17,7 +17,7 @@ export function registerFolderHandlers(ipcMainInstance: typeof ipcMain, store: S
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
 
-      const folders = await getFolders();
+      const folders = await getAllFolders();
       return folders;
     } catch (error) {
       console.error('Error getting folders:', error);

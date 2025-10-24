@@ -1,12 +1,12 @@
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
-import { getThemes, getTheme, createTheme, deleteTheme } from '../../lib/themes';
+import { getAllThemes, getTheme, saveTheme, deleteTheme } from '../../lib/themes.js';
 
 export function registerThemeHandlers(ipcMainInstance: typeof ipcMain, store: Store) {
   // Get all themes
   ipcMainInstance.handle('themes:get-all', async () => {
     try {
-      const themes = await getThemes();
+      const themes = await getAllThemes();
       return themes;
     } catch (error) {
       console.error('Error getting themes:', error);
@@ -28,7 +28,7 @@ export function registerThemeHandlers(ipcMainInstance: typeof ipcMain, store: St
   // Create theme
   ipcMainInstance.handle('themes:create', async (event, data: any) => {
     try {
-      const result = await createTheme(data);
+      const result = await saveTheme(data);
       return result;
     } catch (error) {
       console.error('Error creating theme:', error);

@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
-import { getAllNotes, getNote, saveNote, deleteNote } from '../../lib/notes';
+import { getAllNotes, getNote, saveNote, deleteNote } from '../../lib/notes.js';
 
 async function getNotesDirectory(store: Store): Promise<string> {
   const notesDir = store.get('notesDirectory') as string;

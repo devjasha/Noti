@@ -9,7 +9,7 @@ import {
   getFileHistory,
   getFileAtCommit,
   getGitRemotes,
-} from '../../lib/notes';
+} from '../../lib/notes.js';
 
 async function getNotesDirectory(store: Store): Promise<string> {
   const notesDir = store.get('notesDirectory') as string;

@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
-import { getTemplates, getTemplate, createTemplate, deleteTemplate } from '../../lib/templates';
+import { getAllTemplates, getTemplate, createTemplate, deleteTemplate } from '../../lib/templates.js';
 
 async function getNotesDirectory(store: Store): Promise<string> {
   const notesDir = store.get('notesDirectory') as string;
@@ -17,7 +17,7 @@ export function registerTemplateHandlers(ipcMainInstance: typeof ipcMain, store:
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
 
-      const templates = await getTemplates();
+      const templates = await getAllTemplates();
       return templates;
     } catch (error) {
       console.error('Error getting templates:', error);
@@ -45,7 +45,8 @@ export function registerTemplateHandlers(ipcMainInstance: typeof ipcMain, store:
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
 
-      const result = await createTemplate(data);
+      const { slug, content, metadata } = data;
+      const result = await createTemplate(slug, content, metadata);
       return result;
     } catch (error) {
       console.error('Error creating template:', error);
