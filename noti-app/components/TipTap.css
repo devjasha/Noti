@@ -1,0 +1,410 @@
+/* TipTap Editor Custom Styles */
+
+.tiptap-editor {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.tiptap-editor .ProseMirror {
+  min-height: 100%;
+  max-width: 100%;
+  width: 100%;
+  padding: 2rem 15rem 2rem 15rem; /* More spacing on both sides */
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.7;
+  outline: none;
+  position: relative;
+}
+
+/* Headings with # symbols */
+.tiptap-editor .ProseMirror h1,
+.tiptap-editor .ProseMirror h2,
+.tiptap-editor .ProseMirror h3,
+.tiptap-editor .ProseMirror h4,
+.tiptap-editor .ProseMirror h5,
+.tiptap-editor .ProseMirror h6 {
+  position: relative;
+  padding-left: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 1.5em 0 0.5em 0;
+}
+
+.tiptap-editor .ProseMirror h1:first-child,
+.tiptap-editor .ProseMirror h2:first-child,
+.tiptap-editor .ProseMirror h3:first-child {
+  margin-top: 0;
+}
+
+/* Add # symbols before headings - aligned to the left */
+.tiptap-editor .ProseMirror h1::before {
+  content: '#';
+  position: absolute;
+  left: -4.5rem;
+  width: 4rem;
+  text-align: right;
+  color: var(--text-muted);
+  font-weight: 400;
+  padding-right: 1rem;
+}
+
+.tiptap-editor .ProseMirror h2::before {
+  content: '##';
+  position: absolute;
+  left: -4.5rem;
+  width: 4rem;
+  text-align: right;
+  color: var(--text-muted);
+  font-weight: 400;
+  padding-right: 1rem;
+}
+
+.tiptap-editor .ProseMirror h3::before {
+  content: '###';
+  position: absolute;
+  left: -4.5rem;
+  width: 4rem;
+  text-align: right;
+  color: var(--text-muted);
+  font-weight: 400;
+  padding-right: 1rem;
+}
+
+.tiptap-editor .ProseMirror h4::before {
+  content: '####';
+  position: absolute;
+  left: -4.5rem;
+  width: 4rem;
+  text-align: right;
+  color: var(--text-muted);
+  font-weight: 400;
+  padding-right: 1rem;
+}
+
+.tiptap-editor .ProseMirror h5::before {
+  content: '#####';
+  position: absolute;
+  left: -4.5rem;
+  width: 4rem;
+  text-align: right;
+  color: var(--text-muted);
+  font-weight: 400;
+  padding-right: 1rem;
+}
+
+.tiptap-editor .ProseMirror h6::before {
+  content: '######';
+  position: absolute;
+  left: -4.5rem;
+  width: 4rem;
+  text-align: right;
+  color: var(--text-muted);
+  font-weight: 400;
+  padding-right: 1rem;
+}
+
+.tiptap-editor .ProseMirror h1 {
+  font-size: 2em;
+}
+
+.tiptap-editor .ProseMirror h2 {
+  font-size: 1.5em;
+}
+
+.tiptap-editor .ProseMirror h3 {
+  font-size: 1.25em;
+}
+
+.tiptap-editor .ProseMirror h4 {
+  font-size: 1.1em;
+}
+
+.tiptap-editor .ProseMirror h5 {
+  font-size: 1em;
+}
+
+.tiptap-editor .ProseMirror h6 {
+  font-size: 0.9em;
+}
+
+/* Paragraphs */
+.tiptap-editor .ProseMirror p {
+  margin: 0.75em 0;
+  color: var(--text-secondary);
+}
+
+/* Bold with ** marks */
+.tiptap-editor .ProseMirror strong::before,
+.tiptap-editor .ProseMirror strong::after {
+  content: '**';
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.9em;
+}
+
+/* Italic with * marks */
+.tiptap-editor .ProseMirror em::before,
+.tiptap-editor .ProseMirror em::after {
+  content: '*';
+  color: var(--text-muted);
+  font-style: normal;
+  font-size: 0.9em;
+}
+
+/* Strikethrough with ~~ marks */
+.tiptap-editor .ProseMirror s::before,
+.tiptap-editor .ProseMirror s::after {
+  content: '~~';
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9em;
+}
+
+/* Inline code with ` marks */
+.tiptap-editor .ProseMirror code {
+  background: var(--background);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  color: var(--primary);
+  border: 1px solid var(--border);
+}
+
+.tiptap-editor .ProseMirror code::before,
+.tiptap-editor .ProseMirror code::after {
+  content: '`';
+  color: var(--text-muted);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Code blocks */
+.tiptap-editor .ProseMirror pre {
+  background: var(--background);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 1em;
+  margin: 1em 0;
+  overflow-x: auto;
+  position: relative;
+}
+
+.tiptap-editor .ProseMirror pre::before {
+  content: '```';
+  position: absolute;
+  top: 0.5em;
+  left: 0.5em;
+  color: var(--text-muted);
+  font-size: 0.8em;
+}
+
+.tiptap-editor .ProseMirror pre::after {
+  content: '```';
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8em;
+  margin-top: 0.5em;
+}
+
+.tiptap-editor .ProseMirror pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  color: var(--text-secondary);
+  display: block;
+  margin-top: 1.5em;
+}
+
+.tiptap-editor .ProseMirror pre code::before,
+.tiptap-editor .ProseMirror pre code::after {
+  content: none;
+}
+
+/* Blockquotes */
+.tiptap-editor .ProseMirror blockquote {
+  border-left: 4px solid var(--border-light);
+  padding-left: 1em;
+  margin: 1em 0;
+  color: var(--text-muted);
+  font-style: italic;
+  position: relative;
+}
+
+.tiptap-editor .ProseMirror blockquote::before {
+  content: '> ';
+  position: absolute;
+  left: -1.2em;
+  color: var(--text-muted);
+  font-style: normal;
+}
+
+/* Lists */
+.tiptap-editor .ProseMirror ul,
+.tiptap-editor .ProseMirror ol {
+  padding-left: 2em;
+  margin: 0.75em 0;
+}
+
+.tiptap-editor .ProseMirror ul li,
+.tiptap-editor .ProseMirror ol li {
+  margin: 0.25em 0;
+  color: var(--text-secondary);
+}
+
+/* Custom bullet points */
+.tiptap-editor .ProseMirror ul {
+  list-style: none;
+}
+
+.tiptap-editor .ProseMirror ul li {
+  position: relative;
+}
+
+.tiptap-editor .ProseMirror ul li::before {
+  content: '- ';
+  position: absolute;
+  left: -1.5em;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* Ordered lists */
+.tiptap-editor .ProseMirror ol {
+  list-style: none;
+  counter-reset: list-counter;
+}
+
+.tiptap-editor .ProseMirror ol li {
+  counter-increment: list-counter;
+  position: relative;
+}
+
+.tiptap-editor .ProseMirror ol li::before {
+  content: counter(list-counter) '. ';
+  position: absolute;
+  left: -2em;
+  color: var(--text-muted);
+  font-weight: 700;
+  width: 1.5em;
+  text-align: right;
+}
+
+/* Horizontal rule */
+.tiptap-editor .ProseMirror hr {
+  border: none;
+  border-top: 2px solid var(--border-light);
+  margin: 2em 0;
+  position: relative;
+}
+
+.tiptap-editor .ProseMirror hr::before {
+  content: '---';
+  position: absolute;
+  top: -0.7em;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  padding: 0 0.5em;
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+/* Links - would need Link extension */
+.tiptap-editor .ProseMirror a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* Placeholder */
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--text-muted);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Selection */
+.tiptap-editor .ProseMirror ::selection {
+  background: rgba(61, 122, 237, 0.2);
+}
+
+/* Focus */
+.tiptap-editor .ProseMirror:focus {
+  outline: none;
+}
+
+/* Nested lists */
+.tiptap-editor .ProseMirror ul ul,
+.tiptap-editor .ProseMirror ul ol,
+.tiptap-editor .ProseMirror ol ul,
+.tiptap-editor .ProseMirror ol ol {
+  margin: 0.25em 0;
+}
+
+/* Task Lists (Todo items) */
+.tiptap-editor .ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: center;
+  margin: 0.5em 0;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li::before {
+  content: none;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+  margin-right: 0.75em;
+  user-select: none;
+  display: flex;
+  align-items: center;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li input[type="checkbox"] {
+  width: 1.1em;
+  height: 1.1em;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--primary);
+  border: 2px solid var(--border);
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Checked task items - strikethrough */
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* Nested task lists */
+.tiptap-editor .ProseMirror ul[data-type="taskList"] ul[data-type="taskList"] {
+  margin: 0.25em 0 0.25em 1.5em;
+}
+
+/* Slash command menu - remove tippy background */
+.tippy-box {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.tippy-content {
+  padding: 0 !important;
+}
+
+.tippy-arrow {
+  display: none !important;
+}

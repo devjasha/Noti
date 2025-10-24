@@ -51,15 +51,28 @@ body {
   font-size: 16px;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--text-primary);
   font-weight: 600;
   line-height: 1.4;
 }
 
-h1 { font-size: 2rem; }
-h2 { font-size: 1.71rem; }
-h3 { font-size: 1.4rem; }
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.71rem;
+}
+
+h3 {
+  font-size: 1.4rem;
+}
 
 @layer utilities {
   .text-balance {
