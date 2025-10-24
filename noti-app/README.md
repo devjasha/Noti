@@ -17,7 +17,7 @@ A powerful personal note-taking system with Git integration, built with Electron
 
 ### Download Pre-Built Binaries
 
-Download the latest release for your platform:
+Download the latest release for your platform from [GitHub Releases](https://github.com/devjasha/Noti/releases):
 
 - **Windows**: `Noti-Setup-1.0.0.exe`
 - **macOS**: `Noti-1.0.0.dmg`
@@ -67,101 +67,194 @@ npm run electron:dev
 ```
 
 This will:
-1. Start the Next.js development server on `http://localhost:3000`
-2. Launch the Electron app pointing to the dev server
-3. Open DevTools automatically for debugging
+1. Compile TypeScript for Electron (main process and preload script)
+2. Start the Next.js development server on `http://localhost:3000`
+3. Launch the Electron app pointing to the dev server
+4. Enable hot reload for both renderer and main process changes
 
 ### Project Structure
 
 ```
 noti-app/
 ├── app/                    # Next.js app directory
-│   ├── api/               # API routes (not used in Electron)
-│   └── dashboard/         # Main dashboard page
-├── components/            # React components
-├── electron/              # Electron main process
-│   ├── main.js           # Main process entry point
-│   ├── preload.js        # Preload script (IPC bridge)
-│   └── ipc-handlers/     # IPC request handlers
-├── lib/                   # Shared utilities
-│   ├── electron-api.ts   # Frontend API wrapper
-│   ├── notes.ts          # Note management logic
-│   ├── folders.ts        # Folder management logic
-│   ├── templates.ts      # Template management logic
-│   └── themes.ts         # Theme management logic
-└── themes/                # Theme JSON files
+│   └── dashboard/          # Main dashboard page
+├── components/             # React components
+│   ├── FileTree.tsx       # File tree navigation with context menus
+│   ├── GitStatus.tsx      # Git status widget with auto-refresh
+│   ├── MarkdownEditor.tsx # Editor with preview and diff
+│   ├── NoteHistory.tsx    # Note version history viewer
+│   ├── SettingsModal.tsx  # Settings and theme selector
+│   └── ...                # Other UI components
+├── electron/               # Electron main process
+│   ├── main.ts            # Main process entry point
+│   ├── preload.ts         # Preload script (IPC bridge)
+│   └── ipc-handlers/      # IPC request handlers
+│       ├── notes.ts       # Note CRUD operations
+│       ├── folders.ts     # Folder operations
+│       ├── templates.ts   # Template operations
+│       ├── git.ts         # Git operations
+│       └── themes.ts      # Theme loading
+├── lib/                    # Shared utilities
+│   ├── electron-api.ts    # Frontend API wrapper (IPC client)
+│   ├── notes.ts           # Note management logic
+│   ├── folders.ts         # Folder management logic
+│   ├── templates.ts       # Template management logic
+│   └── themes.ts          # Theme loading and validation
+├── themes/                 # Theme JSON files
+└── electron-dist/          # Compiled Electron code (generated)
 ```
 
 ## First Run
 
 On first launch, Noti will prompt you to select a directory for storing your notes. You can choose any location on your computer.
 
-Your notes will be stored as plain Markdown files with YAML frontmatter, making them easily accessible and portable.
+Your notes will be stored as plain Markdown files with YAML frontmatter:
+
+```markdown
+---
+title: My Note Title
+tags: [work, important]
+created: 2024-10-23T12:00:00Z
+---
+
+# Note Content
+
+This is the markdown content of the note.
+```
+
+This format makes your notes:
+- **Portable**: Move them anywhere, access with any text editor
+- **Version-controlled**: Full git history
+- **Future-proof**: Plain text files will always be readable
 
 ## Features Guide
 
 ### Notes Management
 
-- **Create Note**: Click "New Note" or use templates
+- **Create Note**: Click "New Note" or use Ctrl+N
 - **Edit Note**: Click any note in the file tree
 - **Delete Note**: Right-click note → Delete
 - **Move Note**: Right-click note → Move to Folder
+- **Auto-save**: Notes save automatically as you type
 
 ### Folders
 
-- **Create Folder**: Click the folder icon next to "New Note"
+- **Create Folder**: Click the folder+ icon or right-click in file tree
 - **Rename Folder**: Right-click folder → Rename
 - **Delete Folder**: Right-click folder → Delete (must be empty)
+- **Nested Folders**: Full support for hierarchical organization
 
 ### Templates
 
 - **Create from Template**: New Note dropdown → From Template
 - **Save as Template**: Right-click note → Save as Template
+- **Template Storage**: Templates are stored in `.templates/` directory
 
 ### Git Integration
 
-- **View Changes**: Check the Git Status sidebar (Ctrl+Shift+G)
-- **Commit Changes**: Enter message and click "Commit"
-- **Push/Pull**: Use sync buttons to push/pull from remote
-- **View History**: Open Note History sidebar (Ctrl+H)
-- **View Diff**: Click the diff button while editing
+The Git Status widget provides real-time version control:
+
+- **Auto-refresh**: Status updates every 5 seconds
+- **View Changes**: See modified, created, and deleted files
+- **Commit**: Write a message and commit with one click
+- **Push/Pull**: Sync with remote repository
+- **Commit & Push**: Option to commit and push in one action
+- **View History**: Access note history via Ctrl+H
+- **Visual Diff**: Compare versions side-by-side
+
+**Recent Fix**: Git Status now properly shows all file changes (modified, created, deleted) by correctly parsing simple-git status objects.
 
 ### Themes
 
-- Click the theme selector in the sidebar
-- Choose from built-in themes or create custom ones
-- Custom themes can be created in Settings
+- **Access**: Settings (gear icon) or File menu
+- **Built-in Themes**: Inkdrop Light/Dark, Kanagawa, Dracula, Nord, and more
+- **Custom Themes**: Create your own (see `themes/README.md`)
+- **Hot Reload**: Theme changes apply instantly
+- **Theme Picker**: Visual preview of each theme
 
 ### Keyboard Shortcuts
 
+- `Ctrl+N` - New note
+- `Ctrl+S` - Save note (auto-saves on edit)
+- `Ctrl+F` - Search notes
 - `Ctrl+B` - Toggle file tree
 - `Ctrl+Shift+G` - Toggle git status
 - `Ctrl+H` - Toggle note history
-- `Ctrl+S` - Save note (implicit auto-save on edit)
+- `Ctrl+,` - Settings
 
 ## Configuration
 
 ### Notes Directory
 
 Change your notes directory location:
-1. Menu → File → Change Notes Directory
+1. File → Change Notes Directory
 2. Select new directory
-3. Restart the application
+3. App will automatically reload
+
+The notes directory path is stored in electron-store and persists across sessions.
 
 ### Git Configuration
 
-Noti uses your system's git configuration. To set up remote sync:
+To sync notes across devices, set up a git remote:
 
 ```bash
 cd /path/to/your/notes
 git remote add origin https://github.com/yourusername/your-notes-repo.git
 ```
 
-Or use SSH:
+Or with SSH:
 
 ```bash
 git remote add origin git@github.com:yourusername/your-notes-repo.git
 ```
+
+Then use the Git Status widget to commit and push changes.
+
+## Architecture
+
+### Multi-Process Architecture
+
+Noti uses Electron's multi-process architecture for security and performance:
+
+- **Main Process** (`electron/main.ts`):
+  - Manages application lifecycle
+  - Handles file system and git operations
+  - Registers IPC handlers
+  - Manages windows and menus
+
+- **Renderer Process** (Next.js React app):
+  - Renders the UI
+  - Handles user interactions
+  - Communicates with main process via IPC
+
+- **Preload Script** (`electron/preload.ts`):
+  - Secure bridge between main and renderer
+  - Exposes `window.electron` API via contextBridge
+  - Prevents direct access to Node.js APIs from renderer
+
+### IPC Communication
+
+All operations that require file system or git access use IPC:
+
+```typescript
+// Frontend (renderer)
+const notes = await notesAPI.getAll();
+
+// Backend (main process)
+ipcMain.handle('notes:get-all', async () => {
+  const notesDir = await getNotesDirectory(store);
+  process.env.NOTES_DIR = notesDir;
+  return await getAllNotes();
+});
+```
+
+### TypeScript Configuration
+
+The project uses separate TypeScript configurations:
+
+- `tsconfig.json`: Base configuration for Next.js
+- `tsconfig.electron.json`: ES modules for main process
+- `tsconfig.preload.json`: CommonJS for preload script (Electron requirement)
 
 ## File Format
 
@@ -179,6 +272,8 @@ created: 2024-10-23T12:00:00Z
 This is the markdown content of the note.
 ```
 
+Templates follow the same format and are stored in `.templates/` directory.
+
 ## Troubleshooting
 
 ### App won't start
@@ -186,38 +281,91 @@ This is the markdown content of the note.
 - Check that Node.js 20+ is installed
 - Ensure notes directory is accessible
 - Check console for errors (View → Toggle DevTools)
+- Try deleting `electron-dist/` and running `npm run electron:compile`
 
 ### Git operations failing
 
-- Ensure git is installed on your system
+- Ensure git is installed on your system (`git --version`)
 - Check git credentials for remote operations
 - Verify remote repository URL is correct
+- For SSH: Ensure SSH keys are configured (`ssh -T git@github.com`)
 
-### Notes not syncing
+### Notes not showing
 
-- Check internet connection
-- Verify git remote is configured
-- Ensure you have push/pull permissions
+- Verify notes directory path in Settings
+- Check that files have `.md` extension
+- Ensure files have valid YAML frontmatter
+- Try refreshing with Ctrl+R
+
+### Git Status not updating
+
+- The widget auto-refreshes every 5 seconds
+- If files still don't appear, check that they're in the notes directory
+- Manually refresh by toggling the sidebar (Ctrl+Shift+G twice)
+
+### Preload script not loading
+
+- Check that `electron-dist/electron/preload.js` exists
+- Verify preload is compiled as CommonJS (check the file for `require()` not `import`)
+- Run `npm run electron:compile` to rebuild
 
 ## Building for Distribution
 
-### Code Signing (Optional)
+### Development Build
 
-For macOS and Windows, you may want to code sign your app:
+```bash
+npm run electron:build
+```
 
-1. **macOS**: Set `CSC_LINK` and `CSC_KEY_PASSWORD` environment variables
-2. **Windows**: Set `WIN_CSC_LINK` and `WIN_CSC_KEY_PASSWORD`
+### Production Build with Code Signing
+
+For macOS and Windows code signing:
+
+1. **macOS**: Set environment variables:
+   ```bash
+   export CSC_LINK=/path/to/certificate.p12
+   export CSC_KEY_PASSWORD=your_password
+   ```
+
+2. **Windows**: Set environment variables:
+   ```bash
+   export WIN_CSC_LINK=/path/to/certificate.pfx
+   export WIN_CSC_KEY_PASSWORD=your_password
+   ```
+
+3. Build:
+   ```bash
+   npm run electron:build
+   ```
 
 ### Publishing Updates
 
 1. Update version in `package.json`
 2. Build for all platforms
-3. Create GitHub release with built artifacts
-4. Auto-updater will notify users of new version
+3. Create GitHub release with version tag (e.g., `v1.0.1`)
+4. Upload build artifacts to the release
+5. electron-updater will automatically notify users
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## Recent Updates
+
+### v1.0.0 - Electron Migration
+- ✅ Migrated from Docker-based web app to Electron desktop app
+- ✅ Implemented IPC architecture for secure file/git operations
+- ✅ Added dynamic notes directory selection
+- ✅ Fixed git status parsing to properly show file changes
+- ✅ Added auto-refresh to git status widget (5-second interval)
+- ✅ Implemented cross-platform builds (Windows, macOS, Linux)
+- ✅ Added auto-update support via electron-updater
 
 ## License
 
@@ -226,13 +374,20 @@ ISC
 ## Credits
 
 Built with:
-- [Electron](https://www.electronjs.org/)
-- [Next.js](https://nextjs.org/)
-- [React](https://reactjs.org/)
-- [simple-git](https://github.com/steveukx/git-js)
-- [electron-store](https://github.com/sindresorhus/electron-store)
-- [electron-updater](https://github.com/electron-userland/electron-builder)
+- [Electron](https://www.electronjs.org/) - Desktop application framework
+- [Next.js](https://nextjs.org/) - React framework
+- [React](https://reactjs.org/) - UI library
+- [TypeScript](https://www.typescriptlang.org/) - Type safety
+- [simple-git](https://github.com/steveukx/git-js) - Git operations
+- [electron-store](https://github.com/sindresorhus/electron-store) - Settings persistence
+- [electron-updater](https://github.com/electron-userland/electron-builder) - Auto-updates
+- [gray-matter](https://github.com/jonschlinkert/gray-matter) - Frontmatter parsing
+- [minisearch](https://github.com/lucaong/minisearch) - Full-text search
 
 ## Support
 
 For issues and feature requests, please use the [GitHub Issues](https://github.com/devjasha/Noti/issues) page.
+
+---
+
+**Happy note-taking!** 📝
