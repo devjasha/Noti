@@ -179,17 +179,36 @@ export async function deleteNote(slug: string): Promise<boolean> {
 export async function getGitStatus() {
   const git = getGit();
   const status = await git.status();
+
+  // Categorize files by their status
+  const modified: string[] = [];
+  const created: string[] = [];
+  const deleted: string[] = [];
+
+  // Process each file in the status
+  status.files.forEach(file => {
+    // Check working directory status (unstaged changes)
+    if (file.working_dir === 'M' || file.index === 'M') {
+      modified.push(file.path);
+    } else if (file.working_dir === 'D' || file.index === 'D') {
+      deleted.push(file.path);
+    } else if (file.working_dir === '?' || file.index === 'A') {
+      // '?' means untracked, 'A' means added to staging
+      created.push(file.path);
+    }
+  });
+
   // Convert to plain object for IPC serialization
   return {
     current: status.current,
     tracking: status.tracking,
     ahead: status.ahead,
     behind: status.behind,
-    files: status.files,
+    files: status.files.map(f => ({ path: f.path, index: f.index, working_dir: f.working_dir })),
     staged: status.staged,
-    modified: status.modified,
-    created: status.created,
-    deleted: status.deleted,
+    modified,
+    created,
+    deleted,
     renamed: status.renamed,
     conflicted: status.conflicted,
     not_added: status.not_added,
