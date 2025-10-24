@@ -1,16 +1,18 @@
-const { getTemplates, getTemplate, createTemplate, deleteTemplate } = require('../../lib/templates');
+import { ipcMain } from 'electron';
+import Store from 'electron-store';
+import { getTemplates, getTemplate, createTemplate, deleteTemplate } from '../../lib/templates';
 
-async function getNotesDirectory(store) {
-  const notesDir = store.get('notesDirectory');
+async function getNotesDirectory(store: Store): Promise<string> {
+  const notesDir = store.get('notesDirectory') as string;
   if (!notesDir) {
     throw new Error('Notes directory not configured');
   }
   return notesDir;
 }
 
-function registerTemplateHandlers(ipcMain, store) {
+export function registerTemplateHandlers(ipcMainInstance: typeof ipcMain, store: Store) {
   // Get all templates
-  ipcMain.handle('templates:get-all', async () => {
+  ipcMainInstance.handle('templates:get-all', async () => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -24,7 +26,7 @@ function registerTemplateHandlers(ipcMain, store) {
   });
 
   // Get specific template
-  ipcMain.handle('templates:get', async (event, slug) => {
+  ipcMainInstance.handle('templates:get', async (event, slug: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -38,7 +40,7 @@ function registerTemplateHandlers(ipcMain, store) {
   });
 
   // Create template
-  ipcMain.handle('templates:create', async (event, data) => {
+  ipcMainInstance.handle('templates:create', async (event, data: any) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -52,7 +54,7 @@ function registerTemplateHandlers(ipcMain, store) {
   });
 
   // Delete template
-  ipcMain.handle('templates:delete', async (event, slug) => {
+  ipcMainInstance.handle('templates:delete', async (event, slug: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -65,5 +67,3 @@ function registerTemplateHandlers(ipcMain, store) {
     }
   });
 }
-
-module.exports = { registerTemplateHandlers };

@@ -1,16 +1,18 @@
-const { getFolders, createFolder, renameFolder, deleteFolder } = require('../../lib/folders');
+import { ipcMain } from 'electron';
+import Store from 'electron-store';
+import { getFolders, createFolder, renameFolder, deleteFolder } from '../../lib/folders';
 
-async function getNotesDirectory(store) {
-  const notesDir = store.get('notesDirectory');
+async function getNotesDirectory(store: Store): Promise<string> {
+  const notesDir = store.get('notesDirectory') as string;
   if (!notesDir) {
     throw new Error('Notes directory not configured');
   }
   return notesDir;
 }
 
-function registerFolderHandlers(ipcMain, store) {
+export function registerFolderHandlers(ipcMainInstance: typeof ipcMain, store: Store) {
   // Get all folders
-  ipcMain.handle('folders:get-all', async () => {
+  ipcMainInstance.handle('folders:get-all', async () => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -24,7 +26,7 @@ function registerFolderHandlers(ipcMain, store) {
   });
 
   // Create folder
-  ipcMain.handle('folders:create', async (event, folderPath) => {
+  ipcMainInstance.handle('folders:create', async (event, folderPath: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -38,7 +40,7 @@ function registerFolderHandlers(ipcMain, store) {
   });
 
   // Rename folder
-  ipcMain.handle('folders:rename', async (event, folderPath, newName) => {
+  ipcMainInstance.handle('folders:rename', async (event, folderPath: string, newName: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -52,7 +54,7 @@ function registerFolderHandlers(ipcMain, store) {
   });
 
   // Delete folder
-  ipcMain.handle('folders:delete', async (event, folderPath) => {
+  ipcMainInstance.handle('folders:delete', async (event, folderPath: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -65,5 +67,3 @@ function registerFolderHandlers(ipcMain, store) {
     }
   });
 }
-
-module.exports = { registerFolderHandlers };

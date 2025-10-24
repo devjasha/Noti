@@ -1,25 +1,23 @@
-const path = require('path');
-const fs = require('fs').promises;
-const { getNotes, getNote, createNote, updateNote, deleteNote, moveNote } = require('../../lib/notes');
+import { ipcMain } from 'electron';
+import Store from 'electron-store';
+import { getAllNotes, getNote, saveNote, deleteNote } from '../../lib/notes';
 
-async function getNotesDirectory(store) {
-  const notesDir = store.get('notesDirectory');
+async function getNotesDirectory(store: Store): Promise<string> {
+  const notesDir = store.get('notesDirectory') as string;
   if (!notesDir) {
     throw new Error('Notes directory not configured');
   }
   return notesDir;
 }
 
-function registerNoteHandlers(ipcMain, store) {
+export function registerNoteHandlers(ipcMainInstance: typeof ipcMain, store: Store) {
   // Get all notes
-  ipcMain.handle('notes:get-all', async () => {
+  ipcMainInstance.handle('notes:get-all', async () => {
     try {
       const notesDir = await getNotesDirectory(store);
-
-      // Set the environment variable for the notes lib to use
       process.env.NOTES_DIR = notesDir;
 
-      const notes = await getNotes();
+      const notes = await getAllNotes();
       return notes;
     } catch (error) {
       console.error('Error getting notes:', error);
@@ -28,7 +26,7 @@ function registerNoteHandlers(ipcMain, store) {
   });
 
   // Get specific note
-  ipcMain.handle('notes:get', async (event, slug) => {
+  ipcMainInstance.handle('notes:get', async (event, slug: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -42,12 +40,12 @@ function registerNoteHandlers(ipcMain, store) {
   });
 
   // Create note
-  ipcMain.handle('notes:create', async (event, data) => {
+  ipcMainInstance.handle('notes:create', async (event, data: { slug: string; content: string; metadata: any }) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
 
-      const result = await createNote(data);
+      const result = await saveNote(data.slug, data.content, data.metadata);
       return result;
     } catch (error) {
       console.error('Error creating note:', error);
@@ -56,12 +54,12 @@ function registerNoteHandlers(ipcMain, store) {
   });
 
   // Update note
-  ipcMain.handle('notes:update', async (event, slug, data) => {
+  ipcMainInstance.handle('notes:update', async (event, slug: string, data: { content: string; metadata: any }) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
 
-      const result = await updateNote(slug, data);
+      const result = await saveNote(slug, data.content, data.metadata);
       return result;
     } catch (error) {
       console.error('Error updating note:', error);
@@ -70,7 +68,7 @@ function registerNoteHandlers(ipcMain, store) {
   });
 
   // Delete note
-  ipcMain.handle('notes:delete', async (event, slug) => {
+  ipcMainInstance.handle('notes:delete', async (event, slug: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -84,18 +82,31 @@ function registerNoteHandlers(ipcMain, store) {
   });
 
   // Move note
-  ipcMain.handle('notes:move', async (event, slug, targetFolder) => {
+  ipcMainInstance.handle('notes:move', async (event, slug: string, targetFolder: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
 
-      const result = await moveNote(slug, targetFolder);
-      return result;
+      // Get the current note
+      const note = await getNote(slug);
+      if (!note) {
+        throw new Error('Note not found');
+      }
+
+      // Create new slug in target folder
+      const baseName = slug.split('/').pop();
+      const newSlug = targetFolder ? `${targetFolder}/${baseName}` : baseName!;
+
+      // Save to new location
+      await saveNote(newSlug, note.content, { title: note.title, tags: note.tags });
+
+      // Delete old note
+      await deleteNote(slug);
+
+      return { slug: newSlug };
     } catch (error) {
       console.error('Error moving note:', error);
       throw error;
     }
   });
 }
-
-module.exports = { registerNoteHandlers };

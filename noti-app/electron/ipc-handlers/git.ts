@@ -1,29 +1,32 @@
-const {
-  getGitStatus,
+import { ipcMain } from 'electron';
+import Store from 'electron-store';
+import {
+  getGitStatus as libGetGitStatus,
   commitChanges,
-  syncWithRemote,
-  getFileDiff,
+  pushChanges,
+  pullChanges,
+  getDiff,
   getFileHistory,
   getFileAtCommit,
   getGitRemotes,
-} = require('../../lib/notes');
+} from '../../lib/notes';
 
-async function getNotesDirectory(store) {
-  const notesDir = store.get('notesDirectory');
+async function getNotesDirectory(store: Store): Promise<string> {
+  const notesDir = store.get('notesDirectory') as string;
   if (!notesDir) {
     throw new Error('Notes directory not configured');
   }
   return notesDir;
 }
 
-function registerGitHandlers(ipcMain, store) {
+export function registerGitHandlers(ipcMainInstance: typeof ipcMain, store: Store) {
   // Get git status
-  ipcMain.handle('git:status', async () => {
+  ipcMainInstance.handle('git:status', async () => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
 
-      const status = await getGitStatus();
+      const status = await libGetGitStatus();
       return status;
     } catch (error) {
       console.error('Error getting git status:', error);
@@ -32,7 +35,7 @@ function registerGitHandlers(ipcMain, store) {
   });
 
   // Commit changes
-  ipcMain.handle('git:commit', async (event, message) => {
+  ipcMainInstance.handle('git:commit', async (event, message: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -46,12 +49,12 @@ function registerGitHandlers(ipcMain, store) {
   });
 
   // Sync with remote (pull/push)
-  ipcMain.handle('git:sync', async (event, action) => {
+  ipcMainInstance.handle('git:sync', async (event, action: 'pull' | 'push') => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
 
-      const result = await syncWithRemote(action);
+      const result = action === 'pull' ? await pullChanges() : await pushChanges();
       return result;
     } catch (error) {
       console.error('Error syncing with remote:', error);
@@ -60,13 +63,13 @@ function registerGitHandlers(ipcMain, store) {
   });
 
   // Get file diff
-  ipcMain.handle('git:diff', async (event, file) => {
+  ipcMainInstance.handle('git:diff', async (event, file?: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
 
-      const diff = await getFileDiff(file);
-      return diff;
+      const diff = await getDiff(false);
+      return { diff };
     } catch (error) {
       console.error('Error getting diff:', error);
       throw error;
@@ -74,7 +77,7 @@ function registerGitHandlers(ipcMain, store) {
   });
 
   // Get file history
-  ipcMain.handle('git:history', async (event, file) => {
+  ipcMainInstance.handle('git:history', async (event, file: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -88,7 +91,7 @@ function registerGitHandlers(ipcMain, store) {
   });
 
   // Get file at specific commit
-  ipcMain.handle('git:file-version', async (event, file, commitHash) => {
+  ipcMainInstance.handle('git:file-version', async (event, file: string, commitHash: string) => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -102,7 +105,7 @@ function registerGitHandlers(ipcMain, store) {
   });
 
   // Get git remotes
-  ipcMain.handle('git:remotes', async () => {
+  ipcMainInstance.handle('git:remotes', async () => {
     try {
       const notesDir = await getNotesDirectory(store);
       process.env.NOTES_DIR = notesDir;
@@ -115,5 +118,3 @@ function registerGitHandlers(ipcMain, store) {
     }
   });
 }
-
-module.exports = { registerGitHandlers };

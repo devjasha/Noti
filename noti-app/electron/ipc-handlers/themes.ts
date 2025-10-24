@@ -1,8 +1,10 @@
-const { getThemes, getTheme, createTheme, deleteTheme } = require('../../lib/themes');
+import { ipcMain } from 'electron';
+import Store from 'electron-store';
+import { getThemes, getTheme, createTheme, deleteTheme } from '../../lib/themes';
 
-function registerThemeHandlers(ipcMain, store) {
+export function registerThemeHandlers(ipcMainInstance: typeof ipcMain, store: Store) {
   // Get all themes
-  ipcMain.handle('themes:get-all', async () => {
+  ipcMainInstance.handle('themes:get-all', async () => {
     try {
       const themes = await getThemes();
       return themes;
@@ -13,7 +15,7 @@ function registerThemeHandlers(ipcMain, store) {
   });
 
   // Get specific theme
-  ipcMain.handle('themes:get', async (event, name) => {
+  ipcMainInstance.handle('themes:get', async (event, name: string) => {
     try {
       const theme = await getTheme(name);
       return theme;
@@ -24,7 +26,7 @@ function registerThemeHandlers(ipcMain, store) {
   });
 
   // Create theme
-  ipcMain.handle('themes:create', async (event, data) => {
+  ipcMainInstance.handle('themes:create', async (event, data: any) => {
     try {
       const result = await createTheme(data);
       return result;
@@ -35,7 +37,7 @@ function registerThemeHandlers(ipcMain, store) {
   });
 
   // Delete theme
-  ipcMain.handle('themes:delete', async (event, name) => {
+  ipcMainInstance.handle('themes:delete', async (event, name: string) => {
     try {
       await deleteTheme(name);
       return { success: true };
@@ -45,5 +47,3 @@ function registerThemeHandlers(ipcMain, store) {
     }
   });
 }
-
-module.exports = { registerThemeHandlers };

@@ -1,14 +1,14 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
-const path = require('path');
-const Store = require('electron-store');
-const { autoUpdater } = require('electron-updater');
+import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
+import path from 'path';
+import Store from 'electron-store';
+import { autoUpdater } from 'electron-updater';
 
 // Import IPC handlers
-const { registerNoteHandlers } = require('./ipc-handlers/notes');
-const { registerFolderHandlers } = require('./ipc-handlers/folders');
-const { registerTemplateHandlers } = require('./ipc-handlers/templates');
-const { registerThemeHandlers } = require('./ipc-handlers/themes');
-const { registerGitHandlers } = require('./ipc-handlers/git');
+import { registerNoteHandlers } from './ipc-handlers/notes';
+import { registerFolderHandlers } from './ipc-handlers/folders';
+import { registerTemplateHandlers } from './ipc-handlers/templates';
+import { registerThemeHandlers } from './ipc-handlers/themes';
+import { registerGitHandlers } from './ipc-handlers/git';
 
 const store = new Store();
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;

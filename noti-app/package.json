@@ -2,17 +2,17 @@
   "name": "noti-app",
   "version": "1.0.0",
   "description": "A personal note-taking system with Git integration",
-  "main": "electron/main.js",
+  "main": "electron-dist/electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:build": "next build && electron-builder",
-    "electron:build:win": "next build && electron-builder --win",
-    "electron:build:mac": "next build && electron-builder --mac",
-    "electron:build:linux": "next build && electron-builder --linux"
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron . --require tsx/cjs\"",
+    "electron:build": "next build && tsc --project tsconfig.electron.json && electron-builder",
+    "electron:build:win": "next build && tsc --project tsconfig.electron.json && electron-builder --win",
+    "electron:build:mac": "next build && tsc --project tsconfig.electron.json && electron-builder --mac",
+    "electron:build:linux": "next build && tsc --project tsconfig.electron.json && electron-builder --linux"
   },
   "keywords": [
     "notes",
@@ -29,9 +29,10 @@
       "output": "dist"
     },
     "files": [
-      "electron/**/*",
+      "electron-dist/**/*",
       "out/**/*",
-      "package.json"
+      "package.json",
+      "themes/**/*"
     ],
     "win": {
       "target": [
@@ -84,6 +85,7 @@
     "concurrently": "^9.2.1",
     "electron": "^38.4.0",
     "electron-builder": "^26.0.12",
+    "tsx": "^4.20.6",
     "wait-on": "^9.0.1"
   }
 }
