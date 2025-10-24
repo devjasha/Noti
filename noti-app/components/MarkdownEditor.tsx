@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
 import { notesAPI, templatesAPI, gitAPI } from '../lib/electron-api';
 import Tiptap from './TipTap';
 
@@ -22,10 +21,12 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
   const [folder, setFolder] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [showPreview, setShowPreview] = useState(false);
   const [showDiff, setShowDiff] = useState(false);
   const [diff, setDiff] = useState<string>('');
   const [originalContent, setOriginalContent] = useState('');
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (slug !== 'new') {
@@ -142,8 +143,15 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
     setShowDiff(!showDiff);
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
+    // Don't save if it's a new note without a title
+    if (slug === 'new' && !title.trim()) {
+      return;
+    }
+
     setSaving(true);
+    setSaveStatus('saving');
+
     try {
       // Generate slug with folder path if creating new note
       let noteSlug = slug;
@@ -167,12 +175,60 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
         // Update original content to reflect saved state
         setOriginalContent(content);
       }
+
+      setSaveStatus('saved');
     } catch (error) {
       console.error('Error saving note:', error);
+      setSaveStatus('unsaved');
     } finally {
       setSaving(false);
     }
-  };
+  }, [slug, title, folder, content, tags, router]);
+
+  // Auto-save with debounce
+  useEffect(() => {
+    // Skip auto-save for new notes without title or if nothing changed
+    if (slug === 'new' && !title.trim()) {
+      return;
+    }
+
+    if (slug !== 'new' && content === originalContent && title && tags) {
+      return;
+    }
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Mark as unsaved
+    setSaveStatus('unsaved');
+
+    // Set new timeout for auto-save (2 seconds after typing stops)
+    saveTimeoutRef.current = setTimeout(() => {
+      handleSave();
+    }, 2000);
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [content, title, tags, slug, originalContent, handleSave]);
+
+  // Ctrl+S keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSave]);
 
   const handleTagAdd = (tag: string) => {
     if (tag && !tags.includes(tag)) {
@@ -202,27 +258,6 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
-
-  const insertLink = () => {
-    const url = prompt('Enter URL:');
-    if (url) {
-      insertMarkdown('[', `](${url})`, 'link text');
-    }
-  };
-
-  const insertImage = () => {
-    const url = prompt('Enter image URL:');
-    if (url) {
-      const alt = prompt('Enter image description (optional):') || 'image';
-      insertMarkdown(`![${alt}](${url})`);
-    }
-  };
-
-  if (loading) {
-    return <div className="text-center py-8">Loading note...</div>;
-  }
-
-  const lineNumbers = content.split('\n').length;
 
   return (
     <div className="flex flex-col h-screen" style={{ background: 'var(--background)' }}>
@@ -291,21 +326,56 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleSave}
-              disabled={saving || !title.trim()}
-              className="px-5 py-2 text-sm font-semibold text-white rounded transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+          <div className="flex items-center gap-3">
+            {/* Save status indicator */}
+            <div className="flex items-center gap-2 text-sm">
+              {saveStatus === 'saving' && (
+                <>
+                  <div
+                    className="animate-spin"
+                    style={{
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid var(--border)',
+                      borderTopColor: 'var(--primary)',
+                      borderRadius: '50%',
+                    }}
+                  />
+                  <span style={{ color: 'var(--text-muted)' }}>Saving...</span>
+                </>
+              )}
+              {saveStatus === 'saved' && (
+                <>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    style={{ color: '#10b981' }}
+                  >
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  <span style={{ color: 'var(--text-muted)' }}>Saved</span>
+                </>
+              )}
+              {saveStatus === 'unsaved' && (
+                <span style={{ color: 'var(--text-muted)' }}>Unsaved changes</span>
+              )}
+            </div>
+            {/* Keyboard hint */}
+            <div
+              className="px-2 py-1 text-xs font-mono"
               style={{
-                background: 'var(--primary)',
-                borderRadius: 'var(--radius-sm)',
-                boxShadow: 'var(--shadow-sm)'
+                background: 'var(--background)',
+                border: '1px solid var(--border)',
+                borderRadius: '4px',
+                color: 'var(--text-muted)',
               }}
-              onMouseEnter={(e) => !saving && (e.currentTarget.style.background = 'var(--primary-hover)')}
-              onMouseLeave={(e) => !saving && (e.currentTarget.style.background = 'var(--primary)')}
             >
-              {saving ? 'Saving...' : 'Save'}
-            </button>
+              Ctrl+S
+            </div>
           </div>
         </div>
       </header>
@@ -447,13 +517,10 @@ export default function MarkdownEditor({ slug }: MarkdownEditorProps) {
                   }}
                 >
                   {content
-                    // First, convert multiple newlines to preserve spacing by adding placeholder paragraphs
                     .replace(/\n\n+/g, (match) => {
-                      // For each pair of newlines beyond the first, add an empty paragraph marker
                       const extraNewlines = match.length - 2;
                       return '\n\n' + ('&nbsp;\n\n'.repeat(extraNewlines));
                     })
-                    // Then add double spaces before single newlines for line breaks
                     .replace(/([^\n])\n([^\n])/g, '$1  \n$2')
                   }
                 </ReactMarkdown>
