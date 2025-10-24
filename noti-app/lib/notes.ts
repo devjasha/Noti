@@ -178,7 +178,23 @@ export async function deleteNote(slug: string): Promise<boolean> {
  */
 export async function getGitStatus() {
   const git = getGit();
-  return await git.status();
+  const status = await git.status();
+  // Convert to plain object for IPC serialization
+  return {
+    current: status.current,
+    tracking: status.tracking,
+    ahead: status.ahead,
+    behind: status.behind,
+    files: status.files,
+    staged: status.staged,
+    modified: status.modified,
+    created: status.created,
+    deleted: status.deleted,
+    renamed: status.renamed,
+    conflicted: status.conflicted,
+    not_added: status.not_added,
+    isClean: status.isClean(),
+  };
 }
 
 /**
@@ -188,7 +204,18 @@ export async function commitChanges(message: string) {
   const git = getGit();
   await git.add('.');
   await git.commit(message);
-  return await git.log({ maxCount: 1 });
+  const log = await git.log({ maxCount: 1 });
+  // Convert to plain object for IPC serialization
+  return {
+    latest: log.latest ? {
+      hash: log.latest.hash,
+      date: log.latest.date,
+      message: log.latest.message,
+      author_name: log.latest.author_name,
+      author_email: log.latest.author_email,
+    } : null,
+    total: log.total,
+  };
 }
 
 /**
@@ -196,7 +223,9 @@ export async function commitChanges(message: string) {
  */
 export async function pushChanges() {
   const git = getGit();
-  return await git.push();
+  const result = await git.push();
+  // Convert to plain object
+  return { success: true, result: String(result) };
 }
 
 /**
@@ -204,7 +233,14 @@ export async function pushChanges() {
  */
 export async function pullChanges() {
   const git = getGit();
-  return await git.pull();
+  const result = await git.pull();
+  // Convert to plain object
+  return {
+    summary: result.summary,
+    files: result.files,
+    insertions: result.insertions,
+    deletions: result.deletions,
+  };
 }
 
 /**
