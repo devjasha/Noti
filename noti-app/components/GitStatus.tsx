@@ -4,10 +4,19 @@ import { useState, useEffect } from 'react';
 import { gitAPI } from '../lib/electron-api';
 
 interface GitStatusData {
+  current: string;
+  tracking: string | null;
+  ahead: number;
+  behind: number;
+  files: Array<{ path: string; index: string; working_dir: string }>;
+  staged: string[];
   modified: string[];
   created: string[];
   deleted: string[];
-  current: string;
+  renamed: Array<{ from: string; to: string }>;
+  conflicted: string[];
+  not_added: string[];
+  isClean: boolean;
 }
 
 interface GitRemote {
