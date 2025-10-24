@@ -80,6 +80,11 @@ async function ensureNotesDirectoryInitialized(notesDir: string) {
 }
 
 function createWindow() {
+  const preloadPath = path.join(__dirname, 'preload.js');
+  console.log('[main] __dirname:', __dirname);
+  console.log('[main] preloadPath:', preloadPath);
+  console.log('[main] isDev:', isDev);
+
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -88,7 +93,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js'),
+      preload: preloadPath,
     },
     titleBarStyle: 'default',
     backgroundColor: '#1a1a1a',
