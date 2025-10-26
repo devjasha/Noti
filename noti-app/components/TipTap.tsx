@@ -71,10 +71,6 @@ interface TiptapProps {
   noteSlug: string
 }
 
-// Global callbacks for modals (used by SlashCommand)
-let globalLinkCallback: ((url: string, text: string) => void) | null = null
-let globalImageCallback: ((url: string, alt: string) => void) | null = null
-
 const Tiptap = ({ content, onChange, noteSlug }: TiptapProps) => {
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showImageModal, setShowImageModal] = useState(false)
@@ -221,17 +217,6 @@ const Tiptap = ({ content, onChange, noteSlug }: TiptapProps) => {
       />
     </div>
   )
-}
-
-// Export functions to open modals from SlashCommand
-export const openLinkModal = () => {
-  const event = new CustomEvent('tiptap:openLinkModal')
-  window.dispatchEvent(event)
-}
-
-export const openImageModal = () => {
-  const event = new CustomEvent('tiptap:openImageModal')
-  window.dispatchEvent(event)
 }
 
 export default Tiptap

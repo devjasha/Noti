@@ -32,8 +32,6 @@ interface EditorState {
   setShowPreview: (show: boolean) => void
   setShowDiff: (show: boolean) => void
   setDiff: (diff: string) => void
-  toggleDiff: () => void
-  togglePreview: () => void
 
   // Reset state (for loading new notes)
   resetNote: () => void
@@ -103,9 +101,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setShowPreview: (showPreview) => set({ showPreview }),
   setShowDiff: (showDiff) => set({ showDiff }),
   setDiff: (diff) => set({ diff }),
-
-  toggleDiff: () => set({ showDiff: !get().showDiff }),
-  togglePreview: () => set({ showPreview: !get().showPreview }),
 
   resetNote: () => set({
     content: '',
