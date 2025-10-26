@@ -5,8 +5,8 @@ A powerful personal note-taking system with Git integration, built with Electron
 ## Features
 
 ✅ **Rich Markdown Editor** - Write notes in GitHub Flavored Markdown with live preview
-✅ **Dual-Sidebar Navigation** - Primary sidebar for root navigation, extended sidebar for folder/tag browsing
-✅ **Folder Organization** - Organize notes in hierarchical folders with accordion navigation
+✅ **Accordion Navigation** - Single sidebar with breadcrumb navigation for folders and tags
+✅ **Folder Organization** - Organize notes in hierarchical folders with one-level-at-a-time browsing
 ✅ **Smart Tag System** - Tag notes with autocomplete, fuzzy search, and tag-based browsing
 ✅ **Git Version Control** - Full git history, diff viewing, and sync with remote repositories
 ✅ **Template System** - Create reusable note templates
@@ -81,8 +81,8 @@ noti-app/
 ├── app/                    # Next.js app directory
 │   └── dashboard/          # Main dashboard page
 ├── components/             # React components
-│   ├── PrimarySidebar.tsx # Root navigation (folders/tags overview)
-│   ├── ExtendedSidebar.tsx# Content browser (folder/tag contents)
+│   ├── PrimarySidebar.tsx # Sidebar with accordion navigation
+│   ├── NavigationBreadcrumb.tsx # Breadcrumb for current location
 │   ├── GitStatus.tsx      # Git status widget with auto-refresh
 │   ├── MarkdownEditor.tsx # Editor with preview and diff
 │   ├── TagInput.tsx       # Tag autocomplete input component
@@ -143,26 +143,30 @@ This format makes your notes:
 
 ### Navigation System
 
-The app uses a dual-sidebar navigation system:
+The app uses an accordion-style navigation system in a single sidebar:
 
-- **Primary Sidebar**: Shows root-level folders and all tags
-  - Click any folder to open it in the Extended Sidebar
+- **Breadcrumb Navigation**: Shows current location (Home > Folder > Subfolder)
+  - Click any segment to navigate back
+  - Home button returns to root level
+
+- **Folder Mode** (default):
+  - Shows folders and notes at current level
+  - Click folder to navigate into it
+  - See only immediate children (one level at a time)
+  - Tags section visible at root level
+
+- **Tag Mode**:
   - Click any tag to view all notes with that tag
-  - Create new notes and folders at root level
-
-- **Extended Sidebar**: Displays folder/tag contents with accordion navigation
-  - Browse through folder hierarchies one level at a time
-  - Navigate with breadcrumb trail
-  - Create notes/folders within current location
-  - Close with X button to return to single-sidebar view
+  - Shows flat list of tagged notes with folder paths
+  - Click folder path or breadcrumb to return to folder view
 
 ### Folders
 
-- **Create Folder**: Click the folder+ icon in either sidebar
-- **Navigate Folders**: Click folder in Primary Sidebar → Extended Sidebar opens → Navigate deeper
+- **Create Folder**: Click the folder+ icon in sidebar
+- **Navigate Folders**: Click folder name to navigate into it (accordion-style)
 - **Rename Folder**: Right-click folder → Rename
 - **Delete Folder**: Right-click folder → Delete (must be empty)
-- **Nested Folders**: Full support for hierarchical organization with accordion navigation
+- **Nested Folders**: Full support for hierarchical organization
 
 ### Tags
 
@@ -173,9 +177,10 @@ The smart tagging system helps organize and find notes quickly:
 - **Fuzzy Search**: Matches partial characters (e.g., "prd" matches "productivity")
 - **Keyboard Navigation**: Use ↑/↓ arrows to navigate, Enter to select
 - **Quick Add**: Press Enter or comma to add tags
-- **Tag Browser**: View all tags in the Primary Sidebar with usage counts
-- **Browse by Tag**: Click any tag → Extended Sidebar opens with all notes containing that tag
+- **Tag Browser**: View all tags in the sidebar (at root level) with usage counts
+- **Browse by Tag**: Click any tag → Shows all notes containing that tag
 - **Tag Counts**: See how many notes use each tag
+- **Quick Tag Navigation**: Click tag badges on notes to view all notes with that tag
 
 **Tag Input Features**:
 - Autocomplete dropdown with fuzzy matching
@@ -398,14 +403,15 @@ Contributions are welcome! Please:
 
 ## Recent Updates
 
-### Latest - Dual-Sidebar Navigation System
-- ✅ Implemented Primary Sidebar for root-level navigation
-- ✅ Created Extended Sidebar with accordion-style folder browsing
-- ✅ Added smooth slide-in animation for Extended Sidebar
-- ✅ Breadcrumb navigation in Extended Sidebar
-- ✅ Both sidebars can be visible simultaneously for better context
-- ✅ Tag browsing now opens in Extended Sidebar
-- ✅ Folder navigation shows one level at a time (accordion pattern)
+### Latest - Single Sidebar with Accordion Navigation
+- ✅ Simplified to single sidebar based on user feedback
+- ✅ Accordion-style navigation (one level at a time)
+- ✅ Breadcrumb navigation shows current location
+- ✅ Click folders to navigate into them
+- ✅ Click tags to view all tagged notes
+- ✅ Tag badges on notes are clickable for quick navigation
+- ✅ Tags section visible only at root level in folder mode
+- ✅ Clean, focused UX without sidebar expansion
 
 ### Previous - Tag System Enhancement
 - ✅ Implemented smart tag autocomplete with fuzzy search

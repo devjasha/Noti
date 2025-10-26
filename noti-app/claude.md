@@ -147,26 +147,21 @@ noti-app/
 
 ### Navigation
 
-**PrimarySidebar.tsx** (Root Navigation)
-- Shows root-level folders and all tags
-- New note/folder creation at root
-- Settings button
-- Triggers Extended Sidebar on folder/tag click
-
-**ExtendedSidebar.tsx** (Content Browser)
+**PrimarySidebar.tsx** (Main Sidebar)
 - Accordion-style folder navigation (one level at a time)
 - Tag-based note browsing
-- Breadcrumb navigation
+- Breadcrumb navigation at top
 - Search filter
 - New note/folder creation in current context
-- Right-click context menus
-- Close button to hide sidebar
-- Slide-in animation
+- Right-click context menus for folders/notes
+- Tags section visible only at root level
+- Clickable tag badges on notes for quick navigation
 
 **NavigationBreadcrumb.tsx**
 - Dual-mode breadcrumb (folders/tags)
 - Click segments to navigate
 - Home button to return to root
+- Shows current location path
 
 **FolderContextMenu.tsx**
 - Rename/delete folder
@@ -477,33 +472,29 @@ const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
 ## Recent Changes (Git)
 
-### Latest Changes - Dual-Sidebar Navigation System
+### Latest Changes - Single Sidebar Accordion Navigation
 
 **New Features**:
-- Dual-sidebar layout: Primary + Extended sidebars
-- Primary sidebar shows root folders and all tags
-- Extended sidebar for accordion-style browsing
-- Smooth slide-in animation for Extended sidebar
-- Breadcrumb navigation in Extended sidebar
-- Both sidebars visible simultaneously for context
-- Folder navigation one level at a time (accordion pattern)
-- Tag browsing in Extended sidebar
-
-**Files Created**:
-- `components/PrimarySidebar.tsx` - Root navigation with folders/tags overview
-- `components/ExtendedSidebar.tsx` - Content browser with accordion navigation
-- `components/NavigationBreadcrumb.tsx` - Dual-mode breadcrumb component
+- Simplified to single sidebar with internal accordion navigation
+- Breadcrumb navigation shows current location
+- Click folders to navigate into them (one level at a time)
+- Click tags to view all tagged notes
+- Clickable tag badges on notes for quick tag navigation
+- Tags section visible only at root level in folder mode
+- Clean UX without sidebar expansion
 
 **Files Modified**:
-- `app/dashboard/page.tsx` - Updated to use dual-sidebar layout with state management
-- `README.md` - Updated feature list and navigation documentation
+- `components/PrimarySidebar.tsx` - Complete rewrite with accordion navigation logic
+- `app/dashboard/page.tsx` - Simplified to use single PrimarySidebar
+- `README.md` - Updated navigation documentation
 - `claude.md` - Updated component documentation
 
 **Architecture Changes**:
-- Split FileTree.tsx functionality into PrimarySidebar and ExtendedSidebar
-- Moved accordion navigation logic to ExtendedSidebar
-- Added slide-in CSS animation
-- Dashboard now manages both sidebar states
+- Consolidated all navigation into PrimarySidebar
+- Removed dual-sidebar complexity
+- Navigation happens in place within single sidebar
+- Breadcrumb shows current path
+- Two view modes: folders (default) and tags
 
 ### Previous Changes - Tag System Enhancement
 
