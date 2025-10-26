@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
-import { getAllNotes, getNote, saveNote, deleteNote } from '../../lib/notes.js';
+import { getAllNotes, getNote, saveNote, deleteNote, getAllTags } from '../../lib/notes.js';
 import fs from 'fs/promises';
 import { simpleGit } from 'simple-git';
 
@@ -123,6 +123,20 @@ export function registerNoteHandlers(ipcMainInstance: typeof ipcMain, store: Sto
       return { slug: newSlug };
     } catch (error) {
       console.error('Error moving note:', error);
+      throw error;
+    }
+  });
+
+  // Get all tags
+  ipcMainInstance.handle('tags:get-all', async () => {
+    try {
+      const notesDir = await getNotesDirectory(store);
+      process.env.NOTES_DIR = notesDir;
+
+      const tags = await getAllTags();
+      return tags;
+    } catch (error) {
+      console.error('Error getting tags:', error);
       throw error;
     }
   });

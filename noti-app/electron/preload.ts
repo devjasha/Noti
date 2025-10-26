@@ -31,6 +31,11 @@ contextBridge.exposeInMainWorld('electron', {
     delete: (slug: string) => ipcRenderer.invoke('templates:delete', slug),
   },
 
+  // Tags API
+  tags: {
+    getAll: () => ipcRenderer.invoke('tags:get-all'),
+  },
+
   // Themes API
   themes: {
     getAll: () => ipcRenderer.invoke('themes:get-all'),

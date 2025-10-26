@@ -9,7 +9,7 @@ import TemplatePickerModal from './TemplatePickerModal';
 import FolderPickerModal from './FolderPickerModal';
 import FolderContextMenu from './FolderContextMenu';
 import NoteContextMenu from './NoteContextMenu';
-import { notesAPI, foldersAPI, templatesAPI } from '../lib/electron-api';
+import { notesAPI, foldersAPI, templatesAPI, tagsAPI } from '../lib/electron-api';
 
 interface NoteMetadata {
   slug: string;
@@ -51,10 +51,14 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
   } | null>(null);
   const [noteToMove, setNoteToMove] = useState<{ slug: string; currentFolder: string } | null>(null);
   const [noteForTemplate, setNoteForTemplate] = useState<{ slug: string; title: string } | null>(null);
+  const [allTags, setAllTags] = useState<Array<{ tag: string; count: number }>>([]);
+  const [showTags, setShowTags] = useState(true);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   useEffect(() => {
     fetchNotes();
     fetchFolders();
+    fetchTags();
   }, []);
 
   // Refresh notes list when selectedNote changes (e.g., after creating a new note)
@@ -65,6 +69,7 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
       if (!noteExists && notes.length > 0) {
         // Note doesn't exist in list, refresh to get the newly created note
         fetchNotes();
+        fetchTags();
       }
     }
   }, [selectedNote]);
@@ -109,6 +114,15 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     }
   };
 
+  const fetchTags = async () => {
+    try {
+      const tags = await tagsAPI.getAll();
+      setAllTags(tags);
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+    }
+  };
+
   const toggleFolder = (folder: string) => {
     setExpandedFolders(prev => {
       const newSet = new Set(prev);
@@ -132,6 +146,7 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
       await foldersAPI.create(folderPath);
       fetchFolders(); // Refresh folders to show new folder immediately
       fetchNotes(); // Also refresh notes
+      fetchTags(); // Refresh tags
     } catch (error) {
       console.error('Error creating folder:', error);
     }
@@ -154,6 +169,7 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     try {
       await notesAPI.move(noteToMove.slug, targetFolder);
       fetchNotes(); // Refresh notes
+      fetchTags(); // Refresh tags
       setNoteToMove(null);
     } catch (error) {
       console.error('Error moving note:', error);
@@ -189,6 +205,7 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
       await foldersAPI.rename(folderPath, newName);
       fetchFolders();
       fetchNotes();
+      fetchTags();
     } catch (error) {
       console.error('Error renaming folder:', error);
     }
@@ -201,6 +218,7 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
       await foldersAPI.delete(folderPath);
       fetchFolders();
       fetchNotes();
+      fetchTags();
     } catch (error: any) {
       alert(error.message || 'Failed to delete folder');
     }
@@ -212,6 +230,7 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     try {
       await notesAPI.delete(slug);
       fetchNotes();
+      fetchTags();
     } catch (error) {
       console.error('Error deleting note:', error);
     }
@@ -239,12 +258,23 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
 
   // Filter notes
   const filteredNotesByFolder = Object.entries(notesByFolder).reduce((acc, [folder, folderNotes]) => {
-    const filtered = folderNotes.filter(note =>
-      note.title.toLowerCase().includes(filter.toLowerCase()) ||
-      note.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase()))
-    );
+    let filtered = folderNotes;
+
+    // Filter by selected tag
+    if (selectedTag) {
+      filtered = filtered.filter(note => note.tags.includes(selectedTag));
+    }
+
+    // Filter by search text
+    if (filter) {
+      filtered = filtered.filter(note =>
+        note.title.toLowerCase().includes(filter.toLowerCase()) ||
+        note.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase()))
+      );
+    }
+
     // Include folder even if empty (no filter applied) or has filtered notes
-    if (!filter || filtered.length > 0 || folderNotes.length === 0) {
+    if ((!filter && !selectedTag) || filtered.length > 0 || folderNotes.length === 0) {
       acc[folder] = filtered;
     }
     return acc;
@@ -376,8 +406,97 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
         />
       </div>
 
+      {/* Tags Section */}
+      {allTags.length > 0 && (
+        <div className="px-2 py-2 border-b" style={{ borderColor: 'var(--border-light)' }}>
+          <button
+            onClick={() => setShowTags(!showTags)}
+            className="w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium transition-colors rounded"
+            style={{
+              color: 'var(--text-primary)',
+              background: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--background)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+            }}
+          >
+            <span className="text-xs">{showTags ? '▼' : '▶'}</span>
+            <span>🏷️</span>
+            <span>Tags</span>
+            <span className="ml-auto text-xs" style={{ color: 'var(--text-muted)' }}>
+              {allTags.length}
+            </span>
+          </button>
+
+          {showTags && (
+            <div className="mt-1 space-y-0.5">
+              {allTags.map(({ tag, count }) => (
+                <button
+                  key={tag}
+                  onClick={() => {
+                    if (selectedTag === tag) {
+                      setSelectedTag(null);
+                    } else {
+                      setSelectedTag(tag);
+                      setFilter(''); // Clear text filter when selecting tag
+                    }
+                  }}
+                  className="w-full flex items-center justify-between px-3 py-1.5 text-sm rounded transition-all"
+                  style={{
+                    background: selectedTag === tag ? 'rgba(61, 122, 237, 0.1)' : 'transparent',
+                    color: selectedTag === tag ? 'var(--primary)' : 'var(--text-secondary)',
+                    borderLeft: selectedTag === tag ? '3px solid var(--primary)' : '3px solid transparent',
+                    fontWeight: selectedTag === tag ? 600 : 400,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedTag !== tag) {
+                      e.currentTarget.style.background = 'var(--background)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedTag !== tag) {
+                      e.currentTarget.style.background = 'transparent';
+                    }
+                  }}
+                >
+                  <span className="truncate">{tag}</span>
+                  <span
+                    className="text-xs ml-2 px-1.5 py-0.5 rounded"
+                    style={{
+                      background: 'rgba(61, 122, 237, 0.1)',
+                      color: 'var(--primary)',
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* File Tree */}
       <div className="flex-1 overflow-auto p-2">
+        {selectedTag && (
+          <div className="mb-2 px-2 py-1 text-xs rounded flex items-center gap-2" style={{
+            background: 'rgba(61, 122, 237, 0.1)',
+            color: 'var(--primary)',
+          }}>
+            <span>Filtering by tag: <strong>{selectedTag}</strong></span>
+            <button
+              onClick={() => setSelectedTag(null)}
+              className="ml-auto hover:opacity-70"
+              style={{ color: 'var(--primary)' }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {folders.length === 0 ? (
           <div className="p-4 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
             No notes found

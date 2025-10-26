@@ -21,6 +21,9 @@ export interface ElectronAPI {
     create: (data: any) => Promise<any>;
     delete: (slug: string) => Promise<{ success: boolean }>;
   };
+  tags: {
+    getAll: () => Promise<Array<{ tag: string; count: number }>>;
+  };
   themes: {
     getAll: () => Promise<any[]>;
     get: (name: string) => Promise<any>;

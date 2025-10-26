@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { notesAPI, templatesAPI, gitAPI } from '../lib/electron-api';
 import Tiptap from './TipTap';
+import TagInput from './TagInput';
 import { useEditorStore } from '../store/editorStore';
 
 interface MarkdownEditorProps {
@@ -25,13 +26,11 @@ export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) 
     tags,
     folder,
     loading,
-    saving,
     saveStatus,
     showPreview,
     showDiff,
     diff,
     originalContent,
-    slug,
     setContent,
     setTitle,
     addTag,
@@ -46,7 +45,6 @@ export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) 
     setOriginalContent,
     setSlug,
     loadNote,
-    resetNote,
   } = useEditorStore();
 
   // Initialize slug from props
@@ -294,117 +292,76 @@ export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) 
         background: 'var(--surface)',
         borderBottom: '1px solid var(--border-light)'
       }}>
-        <div className="px-6 py-4 flex items-center gap-3">
-          <div className="flex items-center gap-2 flex-1">
+        <div className="px-6 py-4">
+          <div className="flex items-start justify-between gap-4 mb-3">
             <input
               type="text"
               placeholder="Untitled Note"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="px-0 py-1 text-2xl font-bold bg-transparent focus:outline-none"
+              className="px-0 py-1 text-2xl font-bold bg-transparent focus:outline-none flex-1"
               style={{ color: 'var(--text-primary)' }}
             />
 
-            <div className="flex flex-wrap gap-2">
-              {tags.map(tag => (
-                <span
-                  key={tag}
-                  className="px-2.5 py-1 text-xs font-medium flex items-center gap-1.5"
-                  style={{
-                    background: 'rgba(61, 122, 237, 0.1)',
-                    color: 'var(--primary)',
-                    borderRadius: 'var(--radius-sm)'
-                  }}
-                >
-                  {tag}
-                  <button
-                    onClick={() => handleTagRemove(tag)}
-                    className="hover:opacity-70 transition-opacity"
-                    style={{ color: 'var(--primary)' }}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-              <input
-                type="text"
-                placeholder="Add tag..."
-                className="px-2.5 py-1 text-xs rounded focus:outline-none transition-all"
+            {/* Save status indicator - top right */}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="flex items-center gap-2 text-sm">
+                {saveStatus === 'saving' && (
+                  <>
+                    <div
+                      className="animate-spin"
+                      style={{
+                        width: '14px',
+                        height: '14px',
+                        border: '2px solid var(--border)',
+                        borderTopColor: 'var(--primary)',
+                        borderRadius: '50%',
+                      }}
+                    />
+                    <span style={{ color: 'var(--text-muted)' }}>Saving...</span>
+                  </>
+                )}
+                {saveStatus === 'saved' && (
+                  <>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      style={{ color: '#10b981' }}
+                    >
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    <span style={{ color: 'var(--text-muted)' }}>Saved</span>
+                  </>
+                )}
+                {saveStatus === 'unsaved' && (
+                  <span style={{ color: 'var(--text-muted)' }}>Unsaved changes</span>
+                )}
+              </div>
+              {/* Keyboard hint */}
+              <div
+                className="px-2 py-1 text-xs font-mono"
                 style={{
                   background: 'var(--background)',
                   border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-sm)',
-                  color: 'var(--text-primary)',
-                  width: '100px'
+                  borderRadius: '4px',
+                  color: 'var(--text-muted)',
                 }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--primary)';
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(61, 122, 237, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleTagAdd(e.currentTarget.value);
-                    e.currentTarget.value = '';
-                  }
-                }}
-              />
+              >
+                Ctrl+S
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Save status indicator */}
-            <div className="flex items-center gap-2 text-sm">
-              {saveStatus === 'saving' && (
-                <>
-                  <div
-                    className="animate-spin"
-                    style={{
-                      width: '14px',
-                      height: '14px',
-                      border: '2px solid var(--border)',
-                      borderTopColor: 'var(--primary)',
-                      borderRadius: '50%',
-                    }}
-                  />
-                  <span style={{ color: 'var(--text-muted)' }}>Saving...</span>
-                </>
-              )}
-              {saveStatus === 'saved' && (
-                <>
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    style={{ color: '#10b981' }}
-                  >
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                  <span style={{ color: 'var(--text-muted)' }}>Saved</span>
-                </>
-              )}
-              {saveStatus === 'unsaved' && (
-                <span style={{ color: 'var(--text-muted)' }}>Unsaved changes</span>
-              )}
-            </div>
-            {/* Keyboard hint */}
-            <div
-              className="px-2 py-1 text-xs font-mono"
-              style={{
-                background: 'var(--background)',
-                border: '1px solid var(--border)',
-                borderRadius: '4px',
-                color: 'var(--text-muted)',
-              }}
-            >
-              Ctrl+S
-            </div>
+            <TagInput
+              tags={tags}
+              onAddTag={handleTagAdd}
+              onRemoveTag={handleTagRemove}
+            />
           </div>
         </div>
       </header>
@@ -412,7 +369,6 @@ export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) 
       <main className="flex-1 overflow-hidden flex flex-col">
 
         <div className="flex-1 flex overflow-hidden relative">
-          {/* Floating Action Menu - Always Bottom Right */}
           <div
             className="absolute flex flex-col gap-2 z-10"
             style={{
@@ -456,7 +412,6 @@ export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) 
             )}
           </div>
 
-          {/* Left side: Always show editor */}
           <div
             className={showDiff || showPreview ? "w-1/2 flex" : "w-full flex"}
             style={{
@@ -466,7 +421,6 @@ export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) 
             <Tiptap content={content} onChange={setContent} noteSlug={propSlug} />
           </div>
 
-          {/* Right side: Show diff or preview */}
           {showDiff && (
             <div className="w-1/2 h-full overflow-auto p-8" style={{ background: 'var(--background)' }}>
               <h3 className="text-xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>

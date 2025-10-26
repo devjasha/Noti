@@ -89,6 +89,18 @@ export const notesAPI = {
   },
 };
 
+// Tags API
+export const tagsAPI = {
+  getAll: async () => {
+    if (isElectron && window.electron) {
+      return await window.electron.tags.getAll();
+    }
+    const response = await fetch('/api/tags');
+    if (!response.ok) throw new Error('Failed to fetch tags');
+    return await response.json();
+  },
+};
+
 // Folders API
 export const foldersAPI = {
   getAll: async () => {

@@ -6,6 +6,7 @@ A powerful personal note-taking system with Git integration, built with Electron
 
 ✅ **Rich Markdown Editor** - Write notes in GitHub Flavored Markdown with live preview
 ✅ **Folder Organization** - Organize notes in hierarchical folders
+✅ **Smart Tag System** - Tag notes with autocomplete, fuzzy search, and tag-based filtering
 ✅ **Git Version Control** - Full git history, diff viewing, and sync with remote repositories
 ✅ **Template System** - Create reusable note templates
 ✅ **Dynamic Theming** - Multiple built-in themes + custom theme support
@@ -79,9 +80,10 @@ noti-app/
 ├── app/                    # Next.js app directory
 │   └── dashboard/          # Main dashboard page
 ├── components/             # React components
-│   ├── FileTree.tsx       # File tree navigation with context menus
+│   ├── FileTree.tsx       # File tree navigation with tag browser
 │   ├── GitStatus.tsx      # Git status widget with auto-refresh
 │   ├── MarkdownEditor.tsx # Editor with preview and diff
+│   ├── TagInput.tsx       # Tag autocomplete input component
 │   ├── NoteHistory.tsx    # Note version history viewer
 │   ├── SettingsModal.tsx  # Settings and theme selector
 │   └── ...                # Other UI components
@@ -143,6 +145,26 @@ This format makes your notes:
 - **Rename Folder**: Right-click folder → Rename
 - **Delete Folder**: Right-click folder → Delete (must be empty)
 - **Nested Folders**: Full support for hierarchical organization
+
+### Tags
+
+The smart tagging system helps organize and find notes quickly:
+
+- **Add Tags**: Type in the tag input field below the note title
+- **Autocomplete**: Start typing to see suggestions from existing tags
+- **Fuzzy Search**: Matches partial characters (e.g., "prd" matches "productivity")
+- **Keyboard Navigation**: Use ↑/↓ arrows to navigate, Enter to select
+- **Quick Add**: Press Enter or comma to add tags
+- **Tag Browser**: View all tags in the sidebar with usage counts
+- **Filter by Tag**: Click any tag in the sidebar to filter notes
+- **Tag Counts**: See how many notes use each tag
+
+**Tag Input Features**:
+- Autocomplete dropdown with fuzzy matching
+- Highlights matched characters
+- Shows tag usage count
+- Supports comma-separated batch additions
+- Auto-refreshes after adding new tags
 
 ### Templates
 
@@ -357,6 +379,15 @@ Contributions are welcome! Please:
 5. Submit a pull request
 
 ## Recent Updates
+
+### Latest - Tag System Enhancement
+- ✅ Implemented smart tag autocomplete with fuzzy search
+- ✅ Added tag browser in FileTree sidebar
+- ✅ Tag-based note filtering
+- ✅ Tag usage counts and statistics
+- ✅ Improved editor UI layout with save status in top right
+- ✅ Keyboard navigation for tag input (↑/↓/Enter/Escape)
+- ✅ Auto-refresh tags on note changes
 
 ### v1.0.0 - Electron Migration
 - ✅ Migrated from Docker-based web app to Electron desktop app

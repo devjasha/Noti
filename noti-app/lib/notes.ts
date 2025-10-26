@@ -430,3 +430,34 @@ export async function moveNote(slug: string, targetFolder: string): Promise<Note
   // Return the note with updated slug and folder
   return parseNote(newRelativePath);
 }
+
+export interface TagInfo {
+  tag: string;
+  count: number;
+}
+
+/**
+ * Get all unique tags from all notes with their usage counts
+ */
+export async function getAllTags(): Promise<TagInfo[]> {
+  const notes = await getAllNotes();
+  const tagMap = new Map<string, number>();
+
+  // Count occurrences of each tag
+  notes.forEach(note => {
+    note.tags.forEach(tag => {
+      const count = tagMap.get(tag) || 0;
+      tagMap.set(tag, count + 1);
+    });
+  });
+
+  // Convert to array and sort by count (descending), then alphabetically
+  return Array.from(tagMap.entries())
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => {
+      if (b.count !== a.count) {
+        return b.count - a.count;
+      }
+      return a.tag.localeCompare(b.tag);
+    });
+}

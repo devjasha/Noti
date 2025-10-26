@@ -137,7 +137,7 @@ const Tiptap = ({ content, onChange, noteSlug }: TiptapProps) => {
       // Get HTML content from the editor
       const html = editor.getHTML()
       // Convert file:// URLs back to relative paths before saving
-      const unresolvedHtml = unresolveImagesInContent(html)
+      const unresolvedHtml = unresolveImagesInContent(html, noteSlug)
       onChange(unresolvedHtml)
     },
     editorProps: {
