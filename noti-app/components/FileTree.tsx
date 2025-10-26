@@ -9,6 +9,7 @@ import TemplatePickerModal from './TemplatePickerModal';
 import FolderPickerModal from './FolderPickerModal';
 import FolderContextMenu from './FolderContextMenu';
 import NoteContextMenu from './NoteContextMenu';
+import NavigationBreadcrumb from './NavigationBreadcrumb';
 import { notesAPI, foldersAPI, templatesAPI, tagsAPI } from '../lib/electron-api';
 
 interface NoteMetadata {
@@ -53,7 +54,24 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
   const [noteForTemplate, setNoteForTemplate] = useState<{ slug: string; title: string } | null>(null);
   const [allTags, setAllTags] = useState<Array<{ tag: string; count: number }>>([]);
   const [showTags, setShowTags] = useState(true);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'folders' | 'tags'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('viewMode') as 'folders' | 'tags') || 'folders';
+    }
+    return 'folders';
+  });
+  const [selectedTag, setSelectedTag] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('selectedTag') || '';
+    }
+    return '';
+  });
+  const [currentFolder, setCurrentFolder] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('currentFolder') || '';
+    }
+    return '';
+  });
 
   useEffect(() => {
     fetchNotes();
@@ -123,6 +141,35 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     }
   };
 
+  const navigateToFolder = (folderPath: string) => {
+    setViewMode('folders');
+    setCurrentFolder(folderPath);
+    setSelectedTag('');
+    localStorage.setItem('viewMode', 'folders');
+    localStorage.setItem('currentFolder', folderPath);
+    localStorage.setItem('selectedTag', '');
+    setSelectedFolder(folderPath || 'root');
+  };
+
+  const navigateToTag = (tag: string) => {
+    setViewMode('tags');
+    setSelectedTag(tag);
+    setCurrentFolder('');
+    localStorage.setItem('viewMode', 'tags');
+    localStorage.setItem('selectedTag', tag);
+    localStorage.setItem('currentFolder', '');
+  };
+
+  const navigateHome = () => {
+    setViewMode('folders');
+    setCurrentFolder('');
+    setSelectedTag('');
+    localStorage.setItem('viewMode', 'folders');
+    localStorage.setItem('currentFolder', '');
+    localStorage.setItem('selectedTag', '');
+    setSelectedFolder('root');
+  };
+
   const toggleFolder = (folder: string) => {
     setExpandedFolders(prev => {
       const newSet = new Set(prev);
@@ -139,8 +186,8 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
 
   const handleCreateFolder = async (folderName: string) => {
     try {
-      const folderPath = selectedFolder && selectedFolder !== 'root'
-        ? `${selectedFolder}/${folderName}`
+      const folderPath = currentFolder
+        ? `${currentFolder}/${folderName}`
         : folderName;
 
       await foldersAPI.create(folderPath);
@@ -155,9 +202,8 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
   const handleSelectTemplate = async (templateSlug: string) => {
     try {
       const template = await templatesAPI.get(templateSlug);
-      const folder = selectedFolder && selectedFolder !== 'root' ? selectedFolder : '';
       // Navigate to new note with template content
-      router.push(`/dashboard?note=new&template=${templateSlug}&folder=${folder}`);
+      router.push(`/dashboard?note=new&template=${templateSlug}&folder=${currentFolder}`);
     } catch (error) {
       console.error('Error loading template:', error);
     }
@@ -256,14 +302,9 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     notesByFolder['root'] = [];
   }
 
-  // Filter notes
+  // Filter notes (only by search text, not by tags)
   const filteredNotesByFolder = Object.entries(notesByFolder).reduce((acc, [folder, folderNotes]) => {
     let filtered = folderNotes;
-
-    // Filter by selected tag
-    if (selectedTag) {
-      filtered = filtered.filter(note => note.tags.includes(selectedTag));
-    }
 
     // Filter by search text
     if (filter) {
@@ -274,11 +315,55 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
     }
 
     // Include folder even if empty (no filter applied) or has filtered notes
-    if ((!filter && !selectedTag) || filtered.length > 0 || folderNotes.length === 0) {
+    if (!filter || filtered.length > 0 || folderNotes.length === 0) {
       acc[folder] = filtered;
     }
     return acc;
   }, {} as Record<string, NoteMetadata[]>);
+
+  // Get notes for a specific tag (tag view mode)
+  const getNotesForTag = (tag: string): NoteMetadata[] => {
+    return notes.filter(note => note.tags.includes(tag));
+  };
+
+  // Helper function to get immediate children of current folder
+  const getImmediateChildren = (folderPath: string, allFolderPaths: string[]) => {
+    const children: string[] = [];
+
+    allFolderPaths.forEach(path => {
+      // For root level (folderPath is empty)
+      if (folderPath === '' || folderPath === 'root') {
+        // Get top-level folders (no slashes) and exclude root itself
+        if (!path.includes('/') && path !== 'root' && path !== '') {
+          children.push(path);
+        }
+      } else {
+        // Get immediate children of current folder
+        const normalizedPath = folderPath === 'root' ? '' : folderPath;
+        if (path.startsWith(normalizedPath + '/')) {
+          const remainder = path.substring(normalizedPath.length + 1);
+          // Only include if it's an immediate child (no further slashes)
+          if (!remainder.includes('/')) {
+            children.push(path);
+          }
+        }
+      }
+    });
+
+    return children;
+  };
+
+  // Get notes in current folder only (not subfolders)
+  const getCurrentFolderNotes = () => {
+    const currentFolderKey = currentFolder === '' ? 'root' : currentFolder;
+    return filteredNotesByFolder[currentFolderKey] || [];
+  };
+
+  // Get immediate subfold children of current folder
+  const currentLevelFolders = getImmediateChildren(
+    currentFolder,
+    Object.keys(filteredNotesByFolder)
+  );
 
   const folders = Object.keys(filteredNotesByFolder).sort();
 
@@ -295,6 +380,16 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
       background: 'var(--surface)',
       borderRight: '1px solid var(--border-light)'
     }}>
+      {/* Breadcrumb Navigation */}
+      <div className="border-b" style={{ borderColor: 'var(--border-light)' }}>
+        <NavigationBreadcrumb
+          mode={viewMode}
+          currentPath={viewMode === 'tags' ? selectedTag : currentFolder}
+          onNavigate={navigateToFolder}
+          onNavigateHome={navigateHome}
+        />
+      </div>
+
       {/* Search & New Note */}
       <div className="p-4 space-y-3 border-b" style={{ borderColor: 'var(--border-light)' }}>
         <div className="flex gap-2">
@@ -302,8 +397,7 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
           <div className="flex-1 relative">
             <button
               onClick={() => {
-                const folder = selectedFolder && selectedFolder !== 'root' ? selectedFolder : '';
-                router.push(`/dashboard?note=new&folder=${folder}`);
+                router.push(`/dashboard?note=new&folder=${currentFolder}`);
               }}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-white font-semibold transition-all hover:scale-105 active:scale-95 hover:brightness-110"
               style={{
@@ -436,30 +530,19 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
               {allTags.map(({ tag, count }) => (
                 <button
                   key={tag}
-                  onClick={() => {
-                    if (selectedTag === tag) {
-                      setSelectedTag(null);
-                    } else {
-                      setSelectedTag(tag);
-                      setFilter(''); // Clear text filter when selecting tag
-                    }
-                  }}
+                  onClick={() => navigateToTag(tag)}
                   className="w-full flex items-center justify-between px-3 py-1.5 text-sm rounded transition-all"
                   style={{
-                    background: selectedTag === tag ? 'rgba(61, 122, 237, 0.1)' : 'transparent',
-                    color: selectedTag === tag ? 'var(--primary)' : 'var(--text-secondary)',
-                    borderLeft: selectedTag === tag ? '3px solid var(--primary)' : '3px solid transparent',
-                    fontWeight: selectedTag === tag ? 600 : 400,
+                    background: 'transparent',
+                    color: 'var(--text-secondary)',
+                    borderLeft: '3px solid transparent',
+                    fontWeight: 400,
                   }}
                   onMouseEnter={(e) => {
-                    if (selectedTag !== tag) {
-                      e.currentTarget.style.background = 'var(--background)';
-                    }
+                    e.currentTarget.style.background = 'var(--background)';
                   }}
                   onMouseLeave={(e) => {
-                    if (selectedTag !== tag) {
-                      e.currentTarget.style.background = 'transparent';
-                    }
+                    e.currentTarget.style.background = 'transparent';
                   }}
                 >
                   <span className="truncate">{tag}</span>
@@ -472,6 +555,7 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
                   >
                     {count}
                   </span>
+                  <span className="text-xs ml-2">▶</span>
                 </button>
               ))}
             </div>
@@ -481,156 +565,192 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
 
       {/* File Tree */}
       <div className="flex-1 overflow-auto p-2">
-        {selectedTag && (
-          <div className="mb-2 px-2 py-1 text-xs rounded flex items-center gap-2" style={{
-            background: 'rgba(61, 122, 237, 0.1)',
-            color: 'var(--primary)',
-          }}>
-            <span>Filtering by tag: <strong>{selectedTag}</strong></span>
-            <button
-              onClick={() => setSelectedTag(null)}
-              className="ml-auto hover:opacity-70"
-              style={{ color: 'var(--primary)' }}
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
-        {folders.length === 0 ? (
-          <div className="p-4 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
-            No notes found
-          </div>
-        ) : (
+        {/* Tag View Mode */}
+        {viewMode === 'tags' && selectedTag && (
           <div className="space-y-1">
-            {folders.map(folder => (
-              <div key={folder}>
-                {/* Folder Header */}
-                <button
-                  onClick={() => toggleFolder(folder)}
+            {getNotesForTag(selectedTag).map(note => {
+              const isSelected = selectedNote === note.slug;
+              const folderPath = note.folder || 'root';
+
+              return (
+                <Link
+                  key={note.slug}
+                  href={`/dashboard?note=${note.slug}`}
+                  onClick={(e) => {
+                    if (onNoteSelect) {
+                      e.preventDefault();
+                      onNoteSelect(note.slug);
+                    }
+                  }}
                   onContextMenu={(e) => {
                     e.preventDefault();
                     setContextMenu({
-                      type: 'folder',
+                      type: 'note',
                       x: e.clientX,
                       y: e.clientY,
                       data: {
-                        path: folder === 'root' ? '' : folder,
-                        name: folder,
-                        isEmpty: filteredNotesByFolder[folder].length === 0
+                        slug: note.slug,
+                        title: note.title,
+                        folder: note.folder
                       }
                     });
                   }}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium transition-colors rounded"
+                  className="block px-3 py-2 text-sm rounded transition-all"
                   style={{
-                    color: 'var(--text-primary)',
-                    background: selectedFolder === folder ? 'rgba(61, 122, 237, 0.1)' : 'transparent',
-                    borderLeft: selectedFolder === folder ? '3px solid var(--primary)' : '3px solid transparent'
+                    background: isSelected ? 'rgba(61, 122, 237, 0.1)' : 'transparent',
+                    color: isSelected ? 'var(--primary)' : 'var(--text-secondary)',
+                    borderLeft: isSelected ? '3px solid var(--primary)' : '3px solid transparent',
+                    fontWeight: isSelected ? 600 : 400
                   }}
                   onMouseEnter={(e) => {
-                    if (selectedFolder !== folder) {
+                    if (!isSelected) {
                       e.currentTarget.style.background = 'var(--background)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (selectedFolder !== folder) {
+                    if (!isSelected) {
                       e.currentTarget.style.background = 'transparent';
                     }
                   }}
                 >
-                  <span className="text-xs">{expandedFolders.has(folder) ? '▼' : '▶'}</span>
-                  <span>📁</span>
-                  <span style={{
-                    fontWeight: selectedFolder === folder ? 600 : 400,
-                    color: selectedFolder === folder ? 'var(--primary)' : 'inherit'
-                  }}>
-                    {folder}
-                  </span>
-                  <span className="ml-auto text-xs" style={{ color: 'var(--text-muted)' }}>
-                    {filteredNotesByFolder[folder].length}
-                  </span>
-                </button>
+                  <div className="truncate">{note.title}</div>
+                  <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    📁 {folderPath}
+                  </div>
+                </Link>
+              );
+            })}
 
-                {/* Notes in Folder */}
-                {expandedFolders.has(folder) && (
-                  <div className="ml-6 space-y-0.5 mt-0.5">
-                    {filteredNotesByFolder[folder].map(note => {
-                      const isSelected = selectedNote === note.slug;
-                      return (
-                        <Link
-                          key={note.slug}
-                          href={`/dashboard?note=${note.slug}`}
-                          onClick={(e) => {
-                            // Select the folder that contains this note
-                            const noteFolder = note.folder || 'root';
-                            setSelectedFolder(noteFolder);
-                            localStorage.setItem('selectedFolder', noteFolder);
+            {getNotesForTag(selectedTag).length === 0 && (
+              <div className="p-4 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
+                No notes with this tag
+              </div>
+            )}
+          </div>
+        )}
 
-                            if (onNoteSelect) {
-                              e.preventDefault();
-                              onNoteSelect(note.slug);
-                            }
-                          }}
-                          onContextMenu={(e) => {
-                            e.preventDefault();
-                            setContextMenu({
-                              type: 'note',
-                              x: e.clientX,
-                              y: e.clientY,
-                              data: {
-                                slug: note.slug,
-                                title: note.title,
-                                folder: note.folder
-                              }
-                            });
-                          }}
-                          className="block px-3 py-2 text-sm rounded transition-all"
-                          style={{
-                            background: isSelected ? 'rgba(61, 122, 237, 0.1)' : 'transparent',
-                            color: isSelected ? 'var(--primary)' : 'var(--text-secondary)',
-                            borderLeft: isSelected ? '3px solid var(--primary)' : '3px solid transparent',
-                            fontWeight: isSelected ? 600 : 400
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isSelected) {
-                              e.currentTarget.style.background = 'var(--background)';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isSelected) {
-                              e.currentTarget.style.background = 'transparent';
-                            }
-                          }}
-                        >
-                          <div className="truncate">{note.title}</div>
-                          {note.tags.length > 0 && (
-                            <div className="flex gap-1 mt-1 flex-wrap">
-                              {note.tags.slice(0, 2).map(tag => (
-                                <span
-                                  key={tag}
-                                  className="text-xs px-1.5 py-0.5 rounded"
-                                  style={{
-                                    background: 'rgba(61, 122, 237, 0.1)',
-                                    color: 'var(--primary)'
-                                  }}
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                              {note.tags.length > 2 && (
-                                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                                  +{note.tags.length - 2}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </Link>
-                      );
-                    })}
+        {/* Folder View Mode */}
+        {viewMode === 'folders' && (
+          <div className="space-y-1">
+          {/* Show subfolders at current level */}
+          {currentLevelFolders.map(folder => {
+            const folderName = folder.includes('/') ? folder.split('/').pop() : folder;
+            return (
+              <button
+                key={folder}
+                onClick={() => navigateToFolder(folder)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setContextMenu({
+                    type: 'folder',
+                    x: e.clientX,
+                    y: e.clientY,
+                    data: {
+                      path: folder === 'root' ? '' : folder,
+                      name: folder,
+                      isEmpty: filteredNotesByFolder[folder]?.length === 0
+                    }
+                  });
+                }}
+                className="w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium transition-colors rounded"
+                style={{
+                  color: 'var(--text-primary)',
+                  background: 'transparent',
+                  borderLeft: '3px solid transparent'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--background)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                <span>📁</span>
+                <span className="flex-1 text-left truncate">{folderName}</span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {filteredNotesByFolder[folder]?.length || 0}
+                </span>
+                <span className="text-xs">▶</span>
+              </button>
+            );
+          })}
+
+          {/* Show notes in current folder */}
+          {getCurrentFolderNotes().map(note => {
+            const isSelected = selectedNote === note.slug;
+            return (
+              <Link
+                key={note.slug}
+                href={`/dashboard?note=${note.slug}`}
+                onClick={(e) => {
+                  if (onNoteSelect) {
+                    e.preventDefault();
+                    onNoteSelect(note.slug);
+                  }
+                }}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setContextMenu({
+                    type: 'note',
+                    x: e.clientX,
+                    y: e.clientY,
+                    data: {
+                      slug: note.slug,
+                      title: note.title,
+                      folder: note.folder
+                    }
+                  });
+                }}
+                className="block px-3 py-2 text-sm rounded transition-all"
+                style={{
+                  background: isSelected ? 'rgba(61, 122, 237, 0.1)' : 'transparent',
+                  color: isSelected ? 'var(--primary)' : 'var(--text-secondary)',
+                  borderLeft: isSelected ? '3px solid var(--primary)' : '3px solid transparent',
+                  fontWeight: isSelected ? 600 : 400
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.background = 'var(--background)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
+              >
+                <div className="truncate">{note.title}</div>
+                {note.tags.length > 0 && (
+                  <div className="flex gap-1 mt-1 flex-wrap">
+                    {note.tags.slice(0, 2).map(tag => (
+                      <span
+                        key={tag}
+                        className="text-xs px-1.5 py-0.5 rounded"
+                        style={{
+                          background: 'rgba(61, 122, 237, 0.1)',
+                          color: 'var(--primary)'
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {note.tags.length > 2 && (
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        +{note.tags.length - 2}
+                      </span>
+                    )}
                   </div>
                 )}
-              </div>
-            ))}
+              </Link>
+            );
+          })}
+
+          {/* Empty state */}
+          {currentLevelFolders.length === 0 && getCurrentFolderNotes().length === 0 && (
+            <div className="p-4 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
+              No items in this folder
+            </div>
+          )}
           </div>
         )}
       </div>
@@ -669,7 +789,7 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
         isOpen={showCreateFolder}
         onClose={() => setShowCreateFolder(false)}
         onSubmit={handleCreateFolder}
-        parentFolder={selectedFolder !== 'root' ? selectedFolder : undefined}
+        parentFolder={currentFolder || undefined}
       />
       <TemplatePickerModal
         isOpen={showTemplatePicker}
@@ -702,8 +822,8 @@ export default function FileTree({ selectedNote, onNoteSelect }: FileTreeProps) 
             handleDeleteFolder(contextMenu.data.path);
           }}
           onCreateNote={() => {
-            setSelectedFolder(contextMenu.data.name);
             const folder = contextMenu.data.path;
+            navigateToFolder(folder);
             router.push(`/dashboard?note=new&folder=${folder}`);
           }}
         />

@@ -5,8 +5,9 @@ A powerful personal note-taking system with Git integration, built with Electron
 ## Features
 
 ✅ **Rich Markdown Editor** - Write notes in GitHub Flavored Markdown with live preview
-✅ **Folder Organization** - Organize notes in hierarchical folders
-✅ **Smart Tag System** - Tag notes with autocomplete, fuzzy search, and tag-based filtering
+✅ **Dual-Sidebar Navigation** - Primary sidebar for root navigation, extended sidebar for folder/tag browsing
+✅ **Folder Organization** - Organize notes in hierarchical folders with accordion navigation
+✅ **Smart Tag System** - Tag notes with autocomplete, fuzzy search, and tag-based browsing
 ✅ **Git Version Control** - Full git history, diff viewing, and sync with remote repositories
 ✅ **Template System** - Create reusable note templates
 ✅ **Dynamic Theming** - Multiple built-in themes + custom theme support
@@ -80,7 +81,8 @@ noti-app/
 ├── app/                    # Next.js app directory
 │   └── dashboard/          # Main dashboard page
 ├── components/             # React components
-│   ├── FileTree.tsx       # File tree navigation with tag browser
+│   ├── PrimarySidebar.tsx # Root navigation (folders/tags overview)
+│   ├── ExtendedSidebar.tsx# Content browser (folder/tag contents)
 │   ├── GitStatus.tsx      # Git status widget with auto-refresh
 │   ├── MarkdownEditor.tsx # Editor with preview and diff
 │   ├── TagInput.tsx       # Tag autocomplete input component
@@ -139,12 +141,28 @@ This format makes your notes:
 - **Move Note**: Right-click note → Move to Folder
 - **Auto-save**: Notes save automatically as you type
 
+### Navigation System
+
+The app uses a dual-sidebar navigation system:
+
+- **Primary Sidebar**: Shows root-level folders and all tags
+  - Click any folder to open it in the Extended Sidebar
+  - Click any tag to view all notes with that tag
+  - Create new notes and folders at root level
+
+- **Extended Sidebar**: Displays folder/tag contents with accordion navigation
+  - Browse through folder hierarchies one level at a time
+  - Navigate with breadcrumb trail
+  - Create notes/folders within current location
+  - Close with X button to return to single-sidebar view
+
 ### Folders
 
-- **Create Folder**: Click the folder+ icon or right-click in file tree
+- **Create Folder**: Click the folder+ icon in either sidebar
+- **Navigate Folders**: Click folder in Primary Sidebar → Extended Sidebar opens → Navigate deeper
 - **Rename Folder**: Right-click folder → Rename
 - **Delete Folder**: Right-click folder → Delete (must be empty)
-- **Nested Folders**: Full support for hierarchical organization
+- **Nested Folders**: Full support for hierarchical organization with accordion navigation
 
 ### Tags
 
@@ -155,8 +173,8 @@ The smart tagging system helps organize and find notes quickly:
 - **Fuzzy Search**: Matches partial characters (e.g., "prd" matches "productivity")
 - **Keyboard Navigation**: Use ↑/↓ arrows to navigate, Enter to select
 - **Quick Add**: Press Enter or comma to add tags
-- **Tag Browser**: View all tags in the sidebar with usage counts
-- **Filter by Tag**: Click any tag in the sidebar to filter notes
+- **Tag Browser**: View all tags in the Primary Sidebar with usage counts
+- **Browse by Tag**: Click any tag → Extended Sidebar opens with all notes containing that tag
 - **Tag Counts**: See how many notes use each tag
 
 **Tag Input Features**:
@@ -380,10 +398,19 @@ Contributions are welcome! Please:
 
 ## Recent Updates
 
-### Latest - Tag System Enhancement
+### Latest - Dual-Sidebar Navigation System
+- ✅ Implemented Primary Sidebar for root-level navigation
+- ✅ Created Extended Sidebar with accordion-style folder browsing
+- ✅ Added smooth slide-in animation for Extended Sidebar
+- ✅ Breadcrumb navigation in Extended Sidebar
+- ✅ Both sidebars can be visible simultaneously for better context
+- ✅ Tag browsing now opens in Extended Sidebar
+- ✅ Folder navigation shows one level at a time (accordion pattern)
+
+### Previous - Tag System Enhancement
 - ✅ Implemented smart tag autocomplete with fuzzy search
-- ✅ Added tag browser in FileTree sidebar
-- ✅ Tag-based note filtering
+- ✅ Added tag browser in sidebar
+- ✅ Tag-based note browsing
 - ✅ Tag usage counts and statistics
 - ✅ Improved editor UI layout with save status in top right
 - ✅ Keyboard navigation for tag input (↑/↓/Enter/Escape)

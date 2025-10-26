@@ -42,14 +42,17 @@ noti-app/
 │   ├── dashboard/page.tsx  # Main app UI
 │   └── note/[...slug]/page.tsx  # Dynamic note view
 │
-├── components/             # React components (18 files, ~6111 lines)
+├── components/             # React components
 │   ├── MarkdownEditor.tsx  # Main editor container
 │   ├── TipTap.tsx          # Rich text editor
-│   ├── FileTree.tsx        # File navigation sidebar
+│   ├── PrimarySidebar.tsx  # Root navigation (folders/tags overview)
+│   ├── ExtendedSidebar.tsx # Content browser (accordion navigation)
+│   ├── NavigationBreadcrumb.tsx # Breadcrumb for Extended Sidebar
 │   ├── GitStatus.tsx       # Git widget (commit/push/pull)
 │   ├── NoteHistory.tsx     # Git history sidebar
 │   ├── HistoryModal.tsx    # View historical versions
 │   ├── SettingsModal.tsx   # Settings/theme selector
+│   ├── TagInput.tsx        # Tag autocomplete input
 │   ├── SlashCommand.tsx    # Slash command system
 │   ├── ImageModal.tsx      # Image insertion
 │   ├── LinkModal.tsx       # Link insertion
@@ -144,12 +147,26 @@ noti-app/
 
 ### Navigation
 
-**FileTree.tsx**
-- Hierarchical folder tree
+**PrimarySidebar.tsx** (Root Navigation)
+- Shows root-level folders and all tags
+- New note/folder creation at root
+- Settings button
+- Triggers Extended Sidebar on folder/tag click
+
+**ExtendedSidebar.tsx** (Content Browser)
+- Accordion-style folder navigation (one level at a time)
+- Tag-based note browsing
+- Breadcrumb navigation
 - Search filter
+- New note/folder creation in current context
 - Right-click context menus
-- Git status indicators
-- Settings/template picker buttons
+- Close button to hide sidebar
+- Slide-in animation
+
+**NavigationBreadcrumb.tsx**
+- Dual-mode breadcrumb (folders/tags)
+- Click segments to navigate
+- Home button to return to root
 
 **FolderContextMenu.tsx**
 - Rename/delete folder
@@ -460,18 +477,45 @@ const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
 ## Recent Changes (Git)
 
-### Latest Changes - Tag System Enhancement
+### Latest Changes - Dual-Sidebar Navigation System
+
+**New Features**:
+- Dual-sidebar layout: Primary + Extended sidebars
+- Primary sidebar shows root folders and all tags
+- Extended sidebar for accordion-style browsing
+- Smooth slide-in animation for Extended sidebar
+- Breadcrumb navigation in Extended sidebar
+- Both sidebars visible simultaneously for context
+- Folder navigation one level at a time (accordion pattern)
+- Tag browsing in Extended sidebar
+
+**Files Created**:
+- `components/PrimarySidebar.tsx` - Root navigation with folders/tags overview
+- `components/ExtendedSidebar.tsx` - Content browser with accordion navigation
+- `components/NavigationBreadcrumb.tsx` - Dual-mode breadcrumb component
+
+**Files Modified**:
+- `app/dashboard/page.tsx` - Updated to use dual-sidebar layout with state management
+- `README.md` - Updated feature list and navigation documentation
+- `claude.md` - Updated component documentation
+
+**Architecture Changes**:
+- Split FileTree.tsx functionality into PrimarySidebar and ExtendedSidebar
+- Moved accordion navigation logic to ExtendedSidebar
+- Added slide-in CSS animation
+- Dashboard now manages both sidebar states
+
+### Previous Changes - Tag System Enhancement
 
 **New Features**:
 - Smart tag autocomplete with fuzzy search
-- Tag browser in FileTree sidebar
-- Tag-based note filtering
+- Tag browser in sidebar
+- Tag-based note browsing
 - Tag usage counts and statistics
 - Improved editor UI layout
 
 **Files Modified**:
 - `components/MarkdownEditor.tsx` - Restructured header with save status in top right
-- `components/FileTree.tsx` - Added tag browser section with filtering
 - `lib/notes.ts` - Added getAllTags() function
 - `lib/electron-api.ts` - Added tagsAPI
 - `electron/ipc-handlers/notes.ts` - Added tags:get-all handler
