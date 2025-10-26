@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PrimarySidebar from '@/components/PrimarySidebar';
-import ExtendedSidebar from '@/components/ExtendedSidebar';
 import MarkdownEditor from '@/components/MarkdownEditor';
 import GitStatus from '@/components/GitStatus';
 import NoteHistory from '@/components/NoteHistory';
@@ -12,10 +11,7 @@ import HistoryModal from '@/components/HistoryModal';
 import { settingsAPI } from '@/lib/electron-api';
 
 function DashboardContent() {
-  const [showPrimarySidebar, setShowPrimarySidebar] = useState(true);
-  const [showExtendedSidebar, setShowExtendedSidebar] = useState(false);
-  const [extendedSidebarMode, setExtendedSidebarMode] = useState<'folders' | 'tags'>('folders');
-  const [extendedSidebarPath, setExtendedSidebarPath] = useState('');
+  const [showFileTree, setShowFileTree] = useState(true);
   const [showGitStatus, setShowGitStatus] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [historyCommit, setHistoryCommit] = useState<string | null>(null);
@@ -43,38 +39,19 @@ function DashboardContent() {
     router.push(`/dashboard?note=${slug}`);
   };
 
-  // Handle folder click from primary sidebar
-  const handleFolderClick = (folderPath: string) => {
-    setExtendedSidebarMode('folders');
-    setExtendedSidebarPath(folderPath);
-    setShowExtendedSidebar(true);
-  };
-
-  // Handle tag click from primary sidebar
-  const handleTagClick = (tag: string) => {
-    setExtendedSidebarMode('tags');
-    setExtendedSidebarPath(tag);
-    setShowExtendedSidebar(true);
-  };
-
-  // Handle closing extended sidebar
-  const handleCloseExtendedSidebar = () => {
-    setShowExtendedSidebar(false);
-  };
-
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      console.log('Dashboard received key:', e.key, 'Ctrl:', e.ctrlKey, 'Shift:', e.shiftKey, 'showPrimarySidebar:', showPrimarySidebar);
+      console.log('Dashboard received key:', e.key, 'Ctrl:', e.ctrlKey, 'Shift:', e.shiftKey, 'showFileTree:', showFileTree);
 
-      // Ctrl + B for Primary Sidebar (B for sidebar/Browser)
+      // Ctrl + B for FileTree (B for sidebar/Browser)
       if (e.ctrlKey && !e.shiftKey && e.key === 'b') {
         e.preventDefault();
         e.stopPropagation();
-        console.log('TOGGLING Primary Sidebar from', showPrimarySidebar, 'to', !showPrimarySidebar);
-        setShowPrimarySidebar(prev => {
+        console.log('TOGGLING FileTree from', showFileTree, 'to', !showFileTree);
+        setShowFileTree(prev => {
           const newValue = !prev;
-          console.log('Primary Sidebar setState called, changing from', prev, 'to', newValue);
+          console.log('FileTree setState called, changing from', prev, 'to', newValue);
           return newValue;
         });
       }
@@ -94,7 +71,7 @@ function DashboardContent() {
 
     window.addEventListener('keydown', handleKeyDown, true); // Use capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [showPrimarySidebar, showGitStatus]);
+  }, [showFileTree, showGitStatus]);
 
   const handleViewHistoryVersion = async (commit: string) => {
     setHistoryCommit(commit);
@@ -112,22 +89,11 @@ function DashboardContent() {
 
   return (
     <div className="h-screen flex overflow-hidden" style={{ background: 'var(--background)' }}>
-      {/* Primary Sidebar */}
-      {showPrimarySidebar && (
+      {/* File Tree Sidebar */}
+      {showFileTree && (
         <PrimarySidebar
-          onFolderClick={handleFolderClick}
-          onTagClick={handleTagClick}
-        />
-      )}
-
-      {/* Extended Sidebar */}
-      {showExtendedSidebar && (
-        <ExtendedSidebar
-          mode={extendedSidebarMode}
-          initialPath={extendedSidebarPath}
           selectedNote={selectedNote || undefined}
           onNoteSelect={handleNoteSelect}
-          onClose={handleCloseExtendedSidebar}
         />
       )}
 
