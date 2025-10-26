@@ -234,11 +234,41 @@ export const getSuggestionItems = ({ query }: { query: string }): CommandItem[] 
       },
     },
     {
+      title: 'Table',
+      description: 'Insert a table',
+      icon: '⊞',
+      command: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+      },
+    },
+    {
       title: 'Code Block',
-      description: 'Create a code block',
+      description: 'Code block with syntax highlighting',
       icon: '</>',
       command: ({ editor, range }) => {
         editor.chain().focus().deleteRange(range).toggleCodeBlock().run()
+      },
+    },
+    {
+      title: 'Image',
+      description: 'Insert an image from URL',
+      icon: '🖼',
+      command: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).run()
+        // Dispatch event to open modal
+        const event = new CustomEvent('tiptap:openImageModal')
+        window.dispatchEvent(event)
+      },
+    },
+    {
+      title: 'Link',
+      description: 'Add a link',
+      icon: '🔗',
+      command: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).run()
+        // Dispatch event to open modal
+        const event = new CustomEvent('tiptap:openLinkModal')
+        window.dispatchEvent(event)
       },
     },
     {

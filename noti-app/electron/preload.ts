@@ -56,6 +56,13 @@ contextBridge.exposeInMainWorld('electron', {
     selectNotesDirectory: () => ipcRenderer.invoke('select-notes-directory'),
   },
 
+  // Images API
+  images: {
+    copyToAttachments: (filePath: string, noteSlug: string) => ipcRenderer.invoke('images:copy-to-attachments', filePath, noteSlug),
+    selectFile: () => ipcRenderer.invoke('images:select-file'),
+    resolvePath: (relativePath: string, noteSlug: string) => ipcRenderer.invoke('images:resolve-path', relativePath, noteSlug),
+  },
+
   // Event listeners
   onNotesDirectoryChanged: (callback: (dir: string) => void) => {
     ipcRenderer.on('notes-directory-changed', (_event, dir: string) => callback(dir));

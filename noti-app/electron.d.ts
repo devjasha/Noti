@@ -40,6 +40,11 @@ export interface ElectronAPI {
     getNotesDirectory: () => Promise<string>;
     selectNotesDirectory: () => Promise<string | null>;
   };
+  images: {
+    copyToAttachments: (filePath: string, noteSlug: string) => Promise<{ success: boolean; path?: string; absolutePath?: string; dataUrl?: string; error?: string }>;
+    selectFile: () => Promise<{ success: boolean; path?: string; canceled?: boolean; error?: string }>;
+    resolvePath: (relativePath: string, noteSlug: string) => Promise<{ success: boolean; url?: string; absolutePath?: string; error?: string }>;
+  };
   onNotesDirectoryChanged: (callback: (dir: string) => void) => void;
 }
 

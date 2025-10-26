@@ -17,6 +17,7 @@ import { registerFolderHandlers } from './ipc-handlers/folders.js';
 import { registerTemplateHandlers } from './ipc-handlers/templates.js';
 import { registerThemeHandlers } from './ipc-handlers/themes.js';
 import { registerGitHandlers } from './ipc-handlers/git.js';
+import { registerImageHandlers } from './ipc-handlers/images.js';
 
 const store = new Store();
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
@@ -345,6 +346,7 @@ registerFolderHandlers(ipcMain, store);
 registerTemplateHandlers(ipcMain, store);
 registerThemeHandlers(ipcMain, store);
 registerGitHandlers(ipcMain, store);
+registerImageHandlers(() => mainWindow);
 
 // App lifecycle
 app.whenReady().then(createWindow);
