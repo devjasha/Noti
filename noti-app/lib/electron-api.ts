@@ -319,3 +319,27 @@ export const settingsAPI = {
     return null;
   },
 };
+
+// Images API (Electron only)
+export const imagesAPI = {
+  copyToAttachments: async (filePath: string, noteSlug: string) => {
+    if (isElectron && window.electron) {
+      return await window.electron.images.copyToAttachments(filePath, noteSlug);
+    }
+    return { success: false, error: 'Not in Electron environment' };
+  },
+
+  selectFile: async () => {
+    if (isElectron && window.electron) {
+      return await window.electron.images.selectFile();
+    }
+    return { success: false, error: 'Not in Electron environment' };
+  },
+
+  resolvePath: async (relativePath: string, noteSlug: string) => {
+    if (isElectron && window.electron) {
+      return await window.electron.images.resolvePath(relativePath, noteSlug);
+    }
+    return { success: false, error: 'Not in Electron environment' };
+  },
+};
