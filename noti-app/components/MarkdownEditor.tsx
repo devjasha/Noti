@@ -463,7 +463,7 @@ export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) 
               borderRight: showDiff || showPreview ? '1px solid var(--border-light)' : 'none'
             }}
           >
-            <Tiptap content={content} onChange={setContent} />
+            <Tiptap content={content} onChange={setContent} noteSlug={propSlug} />
           </div>
 
           {/* Right side: Show diff or preview */}
