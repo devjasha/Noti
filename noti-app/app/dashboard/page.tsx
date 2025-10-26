@@ -14,6 +14,7 @@ function DashboardContent() {
   const [showFileTree, setShowFileTree] = useState(true);
   const [showGitStatus, setShowGitStatus] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
+  const [distractionFreeMode, setDistractionFreeMode] = useState(false);
   const [historyCommit, setHistoryCommit] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -44,8 +45,14 @@ function DashboardContent() {
     const handleKeyDown = (e: KeyboardEvent) => {
       console.log('Dashboard received key:', e.key, 'Ctrl:', e.ctrlKey, 'Shift:', e.shiftKey, 'showFileTree:', showFileTree);
 
+      // Ctrl + Shift + D for Distraction Free Mode
+      if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+        e.preventDefault();
+        e.stopPropagation();
+        setDistractionFreeMode(prev => !prev);
+      }
       // Ctrl + B for FileTree (B for sidebar/Browser)
-      if (e.ctrlKey && !e.shiftKey && e.key === 'b') {
+      else if (e.ctrlKey && !e.shiftKey && e.key === 'b') {
         e.preventDefault();
         e.stopPropagation();
         console.log('TOGGLING FileTree from', showFileTree, 'to', !showFileTree);
@@ -56,13 +63,13 @@ function DashboardContent() {
         });
       }
       // Ctrl + Shift + G for GitStatus
-      if (e.ctrlKey && e.shiftKey && (e.key === 'G' || e.key === 'g')) {
+      else if (e.ctrlKey && e.shiftKey && (e.key === 'G' || e.key === 'g')) {
         e.preventDefault();
         e.stopPropagation();
         setShowGitStatus(prev => !prev);
       }
       // Ctrl + H for History
-      if (e.ctrlKey && !e.shiftKey && e.key === 'h') {
+      else if (e.ctrlKey && !e.shiftKey && e.key === 'h') {
         e.preventDefault();
         e.stopPropagation();
         setShowHistory(prev => !prev);
@@ -90,7 +97,7 @@ function DashboardContent() {
   return (
     <div className="h-screen flex overflow-hidden" style={{ background: 'var(--background)' }}>
       {/* File Tree Sidebar */}
-      {showFileTree && (
+      {showFileTree && !distractionFreeMode && (
         <PrimarySidebar
           selectedNote={selectedNote || undefined}
           onNoteSelect={handleNoteSelect}
@@ -114,6 +121,7 @@ function DashboardContent() {
               <div className="text-sm mt-4 space-y-1" style={{ color: 'var(--text-muted)' }}>
                 <p>Keyboard shortcuts:</p>
                 <p>Ctrl+B - Toggle sidebar</p>
+                <p>Ctrl+Shift+D - Distraction-free mode</p>
                 <p>Ctrl+Shift+G - Toggle Git status</p>
                 <p>Ctrl+H - Toggle note history</p>
               </div>
@@ -123,7 +131,7 @@ function DashboardContent() {
       </div>
 
       {/* History Sidebar */}
-      {showHistory && (
+      {showHistory && !distractionFreeMode && (
         <div className="w-96 flex-shrink-0 h-full overflow-hidden">
           <NoteHistory
             filePath={getFilePath(selectedNote)}
@@ -133,7 +141,7 @@ function DashboardContent() {
       )}
 
       {/* Git Status Sidebar */}
-      {showGitStatus && (
+      {showGitStatus && !distractionFreeMode && (
         <div className="w-96 flex-shrink-0 h-full overflow-hidden">
           <GitStatus />
         </div>

@@ -5,6 +5,7 @@ A powerful personal note-taking system with Git integration, built with Electron
 ## Features
 
 ✅ **Rich Markdown Editor** - Write notes in GitHub Flavored Markdown with live preview
+✅ **Distraction-Free Mode** - Focus on writing by hiding all sidebars (Ctrl+Shift+D)
 ✅ **Accordion Navigation** - Single sidebar with breadcrumb navigation for folders and tags
 ✅ **Folder Organization** - Organize notes in hierarchical folders with one-level-at-a-time browsing
 ✅ **Smart Tag System** - Tag notes with autocomplete, fuzzy search, and tag-based browsing
@@ -217,12 +218,23 @@ The Git Status widget provides real-time version control:
 - **Hot Reload**: Theme changes apply instantly
 - **Theme Picker**: Visual preview of each theme
 
+### Distraction-Free Mode
+
+Focus on writing without distractions:
+
+- **Activate**: Press `Ctrl+Shift+D` (or `Cmd+Shift+D` on Mac)
+- **What it does**: Hides all sidebars (file tree, git status, history)
+- **Exit**: Press `Ctrl+Shift+D` again to toggle off
+
+This mode is perfect for focused writing sessions when you don't need navigation or git tools visible.
+
 ### Keyboard Shortcuts
 
 - `Ctrl+N` - New note
 - `Ctrl+S` - Save note (auto-saves on edit)
 - `Ctrl+F` - Search notes
 - `Ctrl+B` - Toggle file tree
+- `Ctrl+Shift+D` - Toggle distraction-free mode
 - `Ctrl+Shift+G` - Toggle git status
 - `Ctrl+H` - Toggle note history
 - `Ctrl+,` - Settings
@@ -403,7 +415,14 @@ Contributions are welcome! Please:
 
 ## Recent Updates
 
-### Latest - Single Sidebar with Accordion Navigation
+### Latest - Distraction-Free Mode
+- ✅ Added distraction-free mode for focused writing
+- ✅ Keyboard shortcut: Ctrl+Shift+D (Cmd+Shift+D on Mac)
+- ✅ Hides all sidebars (file tree, git status, history)
+- ✅ Documented in Settings modal keyboard shortcuts
+- ✅ Perfect for distraction-free writing sessions
+
+### Previous - Single Sidebar with Accordion Navigation
 - ✅ Simplified to single sidebar based on user feedback
 - ✅ Accordion-style navigation (one level at a time)
 - ✅ Breadcrumb navigation shows current location

@@ -192,6 +192,16 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   </kbd>
                 </div>
                 <div className="flex items-center justify-between py-2">
+                  <span style={{ color: 'var(--text-secondary)' }}>Distraction-free mode</span>
+                  <kbd className="px-2 py-1 rounded font-mono text-xs" style={{
+                    background: 'var(--background)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)'
+                  }}>
+                    Ctrl+Shift+D
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between py-2">
                   <span style={{ color: 'var(--text-secondary)' }}>Toggle git status</span>
                   <kbd className="px-2 py-1 rounded font-mono text-xs" style={{
                     background: 'var(--background)',
