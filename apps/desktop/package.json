@@ -71,7 +71,6 @@
       "artifactName": "Noti.dmg"
     },
     "dmg": {
-      "license": "LICENSE",
       "title": "${productName} ${version}",
       "icon": "public/icon.icns",
       "window": {
