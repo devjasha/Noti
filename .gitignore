@@ -30,7 +30,8 @@ pids
 *.pid.lock
 
 # Dependencies
-package-lock.json
+# Note: lockfiles are needed for CI/CD reproducible builds
+# package-lock.json
 
 # OS files
 .DS_Store
