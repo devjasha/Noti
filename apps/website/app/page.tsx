@@ -1,54 +1,37 @@
 import DownloadButton from "@/components/DownloadButton";
+import FeatureShowcase from "@/components/FeatureShowcase";
 
 export default function Home() {
-  const features = [
+  const showcaseFeatures = [
     {
       title: "📝 Rich Markdown Editor",
-      description: "Write with TipTap editor supporting tables, code blocks, task lists, and more with syntax highlighting.",
+      description: "Write with TipTap editor supporting tables, code blocks, task lists, and more with syntax highlighting. Format your notes beautifully with real-time preview and intuitive controls.",
+      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Markdown+Editor",
     },
     {
       title: "🔄 Git Integration",
-      description: "Full Git support with automatic commits, history tracking, and version control built right in.",
+      description: "Full Git support with automatic commits, history tracking, and version control built right in. Never lose your work with comprehensive version control and sync capabilities.",
+      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Git+Integration",
     },
     {
       title: "📂 Folder Organization",
-      description: "Organize your notes with a flexible folder structure and easy navigation.",
+      description: "Organize your notes with a flexible folder structure and easy navigation. Create nested folders, move notes around, and keep everything perfectly organized.",
+      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Folder+Organization",
     },
     {
       title: "🏷️ Tags & Search",
-      description: "Tag your notes and search through them quickly to find what you need.",
-    },
-    {
-      title: "📋 Templates",
-      description: "Create and use templates to speed up note creation for recurring formats.",
+      description: "Tag your notes and search through them quickly to find what you need. Powerful search functionality helps you locate any note in seconds.",
+      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Tags+%26+Search",
     },
     {
       title: "🎨 Custom Themes",
-      description: "Choose from multiple beautiful themes including Dracula, Nord, Kanagawa, and more.",
+      description: "Choose from multiple beautiful themes including Dracula, Nord, Kanagawa, and more. Customize your workspace to match your style and reduce eye strain.",
+      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Custom+Themes",
     },
     {
-      title: "⚡ Slash Commands",
-      description: "Quick access to formatting, images, links, and more with intuitive slash commands.",
-    },
-    {
-      title: "🖼️ Image Support",
-      description: "Embed images directly in your notes with drag-and-drop support.",
-    },
-    {
-      title: "🔗 Link Management",
-      description: "Create and manage internal and external links within your notes.",
-    },
-    {
-      title: "⌨️ Keyboard Shortcuts",
-      description: "Boost productivity with comprehensive keyboard shortcuts for all actions.",
-    },
-    {
-      title: "💾 Local-First",
-      description: "All your data stays on your machine. Full control and privacy.",
-    },
-    {
-      title: "🚀 Cross-Platform",
-      description: "Available for Windows, macOS, and Linux with native performance.",
+      title: "💾 Local-First & Private",
+      description: "All your data stays on your machine. Full control and privacy guaranteed. No cloud sync required unless you want it through Git.",
+      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Local-First",
     },
   ];
 
@@ -70,19 +53,11 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-16">
-        <h2 className="text-4xl font-bold text-center mb-12">Features</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="p-6 rounded-lg border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-shadow"
-            >
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
-            </div>
-          ))}
-        </div>
+      <section className="py-32 bg-gradient-to-b from-transparent via-gray-50 to-transparent dark:via-gray-900">
+        <h2 className="text-4xl md:text-5xl font-bold text-center mb-20">
+          Powerful Features
+        </h2>
+        <FeatureShowcase features={showcaseFeatures} />
       </section>
 
       {/* CTA Section */}
