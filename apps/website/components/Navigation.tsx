@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
+import Link from "next/link";
+import SearchButton from "./SearchButton";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -48,6 +50,14 @@ export default function Navigation() {
             >
               Features
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+            >
+              <Link href="/docs">Docs</Link>
+            </Button>
+            <SearchButton />
             <Button
               variant="ghost"
               size="sm"

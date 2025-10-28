@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import KBarProvider from "@/components/KBarProvider";
 
 export const metadata: Metadata = {
   title: "Noti - Personal Note-Taking with Git Integration",
@@ -14,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        {children}
+        <KBarProvider>{children}</KBarProvider>
       </body>
     </html>
   );

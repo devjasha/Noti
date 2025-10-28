@@ -1,0 +1,194 @@
+---
+title: Git Integration
+description: Learn how to use Git features in Noti
+---
+
+# Git Integration
+
+Noti includes powerful Git integration that helps you never lose your work. Every change is tracked and versioned automatically.
+
+## Setting Up Git
+
+### Initialize Repository
+
+1. Open **Settings** (Gear icon)
+2. Go to **Git** tab
+3. Click **Initialize Repository**
+4. Choose your notes directory
+
+Noti will create a Git repository in your notes folder.
+
+### Configure Remote
+
+To sync with a remote repository (GitHub, GitLab, etc.):
+
+1. Create a repository on your preferred Git hosting service
+2. In Noti Settings > Git, add the remote URL
+3. Click **Add Remote**
+
+```bash
+# Example remote URL
+https://github.com/username/my-notes.git
+```
+
+## Automatic Commits
+
+Noti automatically commits your changes:
+
+- Every time you save a note
+- When you create or delete notes
+- When you modify folders or tags
+
+Commit messages are generated automatically with timestamps and note titles.
+
+## Viewing History
+
+### Note History
+
+1. Open any note
+2. Click the **History** icon
+3. Browse through previous versions
+4. Click any version to view it
+5. Restore a previous version if needed
+
+### Repository History
+
+View your entire commit history:
+
+1. Settings > Git > View History
+2. See all commits with messages
+3. Browse changes across all notes
+
+## Syncing with Remote
+
+### Push Changes
+
+After making changes locally:
+
+1. Click the **Push** button in Git settings
+2. Or use the keyboard shortcut: `Cmd/Ctrl + Shift + P`
+
+Your changes will be pushed to the remote repository.
+
+### Pull Changes
+
+To get changes from the remote:
+
+1. Click the **Pull** button in Git settings
+2. Or use: `Cmd/Ctrl + Shift + L`
+
+Noti will fetch and merge remote changes.
+
+## Conflict Resolution
+
+If conflicts occur during pull:
+
+1. Noti will notify you
+2. Open the conflict resolution view
+3. Choose which version to keep
+4. Save and commit the resolution
+
+## Git Best Practices
+
+### Regular Backups
+
+- Set up a remote repository as backup
+- Push changes regularly
+- Consider automatic sync options
+
+### Branch Strategy
+
+You can use Git branches for different projects:
+
+```bash
+# From terminal in notes directory
+git checkout -b project-name
+```
+
+Switch branches in Noti Settings > Git > Branch selector.
+
+### .gitignore
+
+Create a `.gitignore` file in your notes directory to exclude certain files:
+
+```
+# Ignore temp files
+*.tmp
+.DS_Store
+
+# Ignore drafts folder
+drafts/
+```
+
+## Command Line Integration
+
+Advanced users can also use Git directly:
+
+```bash
+cd ~/Documents/Noti
+git log
+git diff
+git checkout -b new-feature
+```
+
+Changes made via CLI are reflected in Noti immediately.
+
+## Troubleshooting
+
+### Repository Issues
+
+If you encounter problems:
+
+1. **Settings > Git > Repair Repository**
+2. This will check and fix common issues
+
+### Reset Remote
+
+To change remote URL:
+
+```bash
+git remote set-url origin https://new-url.git
+```
+
+Or remove and re-add in Noti settings.
+
+## Advanced Features
+
+### Multiple Remotes
+
+Add multiple remotes for redundancy:
+
+```bash
+git remote add backup https://backup-url.git
+git push backup main
+```
+
+### Git Hooks
+
+Create custom Git hooks in `.git/hooks/` for automation:
+
+- `pre-commit`: Run checks before commit
+- `post-commit`: Trigger actions after commit
+
+## Security
+
+### Private Repositories
+
+Always use private repositories for personal notes:
+
+- GitHub: Create private repo
+- GitLab: Set visibility to private
+- Gitea: Self-hosted private Git
+
+### SSH Keys
+
+For better security, use SSH instead of HTTPS:
+
+1. Generate SSH key: `ssh-keygen`
+2. Add to GitHub/GitLab
+3. Use SSH remote URL: `git@github.com:username/notes.git`
+
+## Next Steps
+
+- Learn about [noti-vim Git integration](/docs/noti-vim)
+- Explore [Markdown features](/docs/markdown)

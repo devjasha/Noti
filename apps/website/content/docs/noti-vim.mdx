@@ -1,0 +1,396 @@
+---
+title: noti-vim
+description: Use Noti from Neovim with noti-vim plugin
+---
+
+# noti-vim
+
+[noti-vim](https://github.com/devjasha/noti-vim) is a Neovim plugin that brings Noti functionality directly into your editor. Perfect for developers who live in the terminal.
+
+## Installation
+
+### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
+
+```lua
+{
+  "devjasha/noti-vim",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    "nvim-telescope/telescope.nvim", -- Optional, for better UI
+  },
+  config = function()
+    require("noti").setup({
+      notes_dir = "~/Documents/Noti",  -- Your notes directory
+      default_ext = ".md",
+    })
+  end,
+}
+```
+
+### Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
+
+```lua
+use {
+  "devjasha/noti-vim",
+  requires = {
+    "nvim-lua/plenary.nvim",
+    "nvim-telescope/telescope.nvim",
+  },
+  config = function()
+    require("noti").setup()
+  end,
+}
+```
+
+### Using [vim-plug](https://github.com/junegunn/vim-plug)
+
+```vim
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
+Plug 'devjasha/noti-vim'
+```
+
+## Configuration
+
+### Basic Setup
+
+```lua
+require("noti").setup({
+  -- Directory where notes are stored
+  notes_dir = "~/Documents/Noti",
+
+  -- Default file extension for notes
+  default_ext = ".md",
+
+  -- Template for new notes
+  template = [[
+---
+title: {{title}}
+date: {{date}}
+tags: []
+---
+
+# {{title}}
+
+]],
+
+  -- Git integration
+  git = {
+    enabled = true,
+    auto_commit = true,
+    auto_push = false,
+  },
+})
+```
+
+### Advanced Configuration
+
+```lua
+require("noti").setup({
+  notes_dir = "~/Documents/Noti",
+  default_ext = ".md",
+
+  -- Custom keybindings
+  keybindings = {
+    find = "<leader>nf",      -- Find notes
+    new = "<leader>nn",        -- New note
+    delete = "<leader>nd",     -- Delete note
+    search = "<leader>ns",     -- Search in notes
+    tags = "<leader>nt",       -- Search by tags
+  },
+
+  -- UI settings
+  ui = {
+    use_telescope = true,      -- Use Telescope for pickers
+    preview = true,            -- Show preview in picker
+  },
+
+  -- Git integration
+  git = {
+    enabled = true,
+    auto_commit = true,
+    auto_push = false,
+    commit_message = "Update: {{filename}}",
+  },
+
+  -- Folders
+  folders = {
+    enabled = true,
+    auto_create = true,
+  },
+})
+```
+
+## Commands
+
+noti-vim provides several commands:
+
+### Note Management
+
+```vim
+:NotiNew              " Create a new note
+:NotiFindNote         " Find and open a note
+:NotiDeleteNote       " Delete current note
+:NotiSearchInNotes    " Search text in all notes
+:NotiTags             " Browse notes by tags
+```
+
+### Git Commands
+
+```vim
+:NotiGitCommit        " Commit changes
+:NotiGitPush          " Push to remote
+:NotiGitPull          " Pull from remote
+:NotiGitLog           " View git log
+:NotiGitHistory       " View current note's history
+```
+
+### Organization
+
+```vim
+:NotiCreateFolder     " Create a new folder
+:NotiMoveNote         " Move note to folder
+:NotiRenameNote       " Rename current note
+```
+
+## Keybindings
+
+Default keybindings (customizable in config):
+
+| Key | Action |
+|-----|--------|
+| `<leader>nf` | Find notes |
+| `<leader>nn` | Create new note |
+| `<leader>nd` | Delete note |
+| `<leader>ns` | Search in notes |
+| `<leader>nt` | Browse tags |
+| `<leader>ng` | Git status |
+| `<leader>nc` | Git commit |
+
+## Usage Examples
+
+### Creating a Note
+
+```vim
+" Quick note creation
+:NotiNew project-ideas
+
+" Or use the keybinding
+<leader>nn
+```
+
+### Finding Notes
+
+```vim
+" Open note picker
+:NotiFindNote
+
+" Or use keybinding
+<leader>nf
+```
+
+The picker shows:
+- Note title
+- Preview (if enabled)
+- Last modified date
+- Tags
+
+### Searching Notes
+
+```vim
+" Search for text across all notes
+:NotiSearchInNotes "git integration"
+
+" Or use keybinding
+<leader>ns
+```
+
+### Working with Tags
+
+Add tags to your notes:
+
+```markdown
+---
+tags: [vim, neovim, productivity]
+---
+```
+
+Browse by tags:
+
+```vim
+:NotiTags
+<leader>nt
+```
+
+### Git Workflow
+
+```vim
+" Manual commit
+:NotiGitCommit
+
+" Push to remote
+:NotiGitPush
+
+" View history
+:NotiGitLog
+```
+
+With `auto_commit = true`, changes are committed automatically when you save.
+
+## Integration with Telescope
+
+When using Telescope, you get enhanced pickers with:
+
+- Live preview
+- Fuzzy finding
+- Multi-select
+- Custom actions
+
+Example Telescope integration:
+
+```lua
+require('telescope').setup{
+  extensions = {
+    noti = {
+      theme = "dropdown",
+      previewer = true,
+      layout_config = {
+        width = 0.8,
+        height = 0.8,
+      },
+    }
+  }
+}
+
+require('telescope').load_extension('noti')
+```
+
+## Tips and Tricks
+
+### Quick Capture
+
+Create a quick note keybinding:
+
+```lua
+vim.keymap.set("n", "<leader>nq", function()
+  vim.cmd("NotiNew " .. os.date("%Y-%m-%d-quick"))
+end, { desc = "Quick note" })
+```
+
+### Daily Notes
+
+Auto-create daily notes:
+
+```lua
+vim.keymap.set("n", "<leader>nd", function()
+  local date = os.date("%Y-%m-%d")
+  vim.cmd("NotiNew daily/" .. date)
+end, { desc = "Daily note" })
+```
+
+### Note Templates
+
+Create custom templates for different note types:
+
+```lua
+local templates = {
+  meeting = [[
+---
+title: {{title}}
+date: {{date}}
+type: meeting
+---
+
+## Attendees
+-
+
+## Agenda
+-
+
+## Notes
+
+## Action Items
+- [ ]
+]],
+
+  project = [[
+---
+title: {{title}}
+date: {{date}}
+type: project
+status: planning
+---
+
+## Overview
+
+## Goals
+
+## Tasks
+- [ ]
+
+## Resources
+]],
+}
+
+require("noti").setup({
+  templates = templates,
+})
+```
+
+## Compatibility
+
+noti-vim works seamlessly with:
+
+- **Noti Desktop App**: Share the same notes directory
+- **Git**: Full version control support
+- **Markdown**: All Noti markdown features
+- **Neovim 0.8+**: Required minimum version
+
+## Troubleshooting
+
+### Notes Not Found
+
+Ensure your `notes_dir` is correct:
+
+```lua
+:lua print(require("noti").config.notes_dir)
+```
+
+### Git Issues
+
+Check Git status:
+
+```vim
+:NotiGitStatus
+```
+
+Or manually in terminal:
+
+```bash
+cd ~/Documents/Noti
+git status
+```
+
+### Telescope Not Working
+
+Ensure Telescope is installed and loaded:
+
+```lua
+require('telescope').load_extension('noti')
+```
+
+## Contributing
+
+noti-vim is open source! Contribute at [github.com/devjasha/noti-vim](https://github.com/devjasha/noti-vim)
+
+## Links
+
+- [GitHub Repository](https://github.com/devjasha/noti-vim)
+- [Report Issues](https://github.com/devjasha/noti-vim/issues)
+- [Main Noti Project](https://github.com/devjasha/Noti)
+
+## Next Steps
+
+- Learn about [Git Integration](/docs/git)
+- Explore [Markdown Features](/docs/markdown)
+- Get started with the [Desktop App](/docs/getting-started)
