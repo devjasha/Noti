@@ -1,0 +1,67 @@
+name: Build Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build-desktop:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build desktop app
+        run: |
+          cd apps/desktop
+          npm ci
+          npm run build
+          npm run electron:compile
+
+      - name: Test desktop app build (no packaging)
+        run: |
+          cd apps/desktop
+          echo "Build successful for ${{ matrix.os }}"
+
+  build-website:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build website
+        run: |
+          cd apps/website
+          npm ci
+          npm run build
+
+      - name: Upload website build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-build
+          path: apps/website/out
