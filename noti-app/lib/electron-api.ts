@@ -75,6 +75,19 @@ export const notesAPI = {
     return await response.json();
   },
 
+  rename: async (oldSlug: string, newTitle: string) => {
+    if (isElectron && window.electron) {
+      return await window.electron.notes.rename(oldSlug, newTitle);
+    }
+    const response = await fetch('/api/notes/rename', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ oldSlug, newTitle }),
+    });
+    if (!response.ok) throw new Error('Failed to rename note');
+    return await response.json();
+  },
+
   move: async (slug: string, targetFolder: string) => {
     if (isElectron && window.electron) {
       return await window.electron.notes.move(slug, targetFolder);

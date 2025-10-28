@@ -174,6 +174,41 @@ export async function deleteNote(slug: string): Promise<boolean> {
 }
 
 /**
+ * Rename a note (change filename based on new title)
+ */
+export async function renameNote(oldSlug: string, newTitle: string): Promise<Note> {
+  const oldRelativePath = `${oldSlug}.md`.replace(/\//g, path.sep);
+  const oldFullPath = path.join(getNotesDir(), oldRelativePath);
+
+  // Read the existing note first
+  const note = await parseNote(oldRelativePath);
+  if (!note) {
+    throw new Error('Note not found');
+  }
+
+  // Generate new filename from title
+  const newBaseName = newTitle.toLowerCase().replace(/\s+/g, '-');
+  const folder = note.folder;
+  const newSlug = folder ? `${folder}/${newBaseName}` : newBaseName;
+  const newRelativePath = `${newSlug}.md`.replace(/\//g, path.sep);
+  const newFullPath = path.join(getNotesDir(), newRelativePath);
+
+  // Don't rename if the paths are the same
+  if (oldFullPath === newFullPath) {
+    return note;
+  }
+
+  // Ensure target directory exists
+  await fs.mkdir(path.dirname(newFullPath), { recursive: true });
+
+  // Move/rename the file (preserves git history better than copy + delete)
+  await fs.rename(oldFullPath, newFullPath);
+
+  // Return the note with updated slug
+  return parseNote(newRelativePath);
+}
+
+/**
  * Get git status for notes
  */
 export async function getGitStatus() {

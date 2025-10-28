@@ -172,6 +172,16 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between py-2">
+                  <span style={{ color: 'var(--text-secondary)' }}>New note</span>
+                  <kbd className="px-2 py-1 rounded font-mono text-xs" style={{
+                    background: 'var(--background)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)'
+                  }}>
+                    Ctrl+N
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between py-2">
                   <span style={{ color: 'var(--text-secondary)' }}>Toggle markdown tools</span>
                   <kbd className="px-2 py-1 rounded font-mono text-xs" style={{
                     background: 'var(--background)',
@@ -189,6 +199,16 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     color: 'var(--text-primary)'
                   }}>
                     Ctrl+B
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span style={{ color: 'var(--text-secondary)' }}>Distraction-free mode</span>
+                  <kbd className="px-2 py-1 rounded font-mono text-xs" style={{
+                    background: 'var(--background)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)'
+                  }}>
+                    Ctrl+Shift+D
                   </kbd>
                 </div>
                 <div className="flex items-center justify-between py-2">

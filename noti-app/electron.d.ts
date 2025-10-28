@@ -7,6 +7,7 @@ export interface ElectronAPI {
     create: (data: { slug: string; content: string; metadata: any }) => Promise<any>;
     update: (slug: string, data: { content: string; metadata: any }) => Promise<any>;
     delete: (slug: string) => Promise<{ success: boolean }>;
+    rename: (oldSlug: string, newTitle: string) => Promise<any>;
     move: (slug: string, targetFolder: string) => Promise<{ slug: string }>;
   };
   folders: {

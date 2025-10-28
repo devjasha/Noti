@@ -18,6 +18,7 @@ export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) 
   const searchParams = useSearchParams();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const originalTitleRef = useRef<string>('');
 
   // Zustand store
   const {
@@ -88,6 +89,7 @@ export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) 
   const fetchNote = async () => {
     try {
       const data = await notesAPI.get(propSlug);
+      originalTitleRef.current = data.title; // Store original title
       loadNote({
         content: data.content,
         title: data.title,
@@ -193,12 +195,37 @@ export default function MarkdownEditor({ slug: propSlug }: MarkdownEditorProps) 
 
       if (propSlug === 'new') {
         const data = await notesAPI.create(body);
+        // Store the new title as the original
+        originalTitleRef.current = title;
+        // Dispatch event to refresh file tree
+        window.dispatchEvent(new CustomEvent('notes:refresh'));
         // Navigate to the newly created note
         router.push(`/dashboard?note=${data.slug}`);
       } else {
-        await notesAPI.update(propSlug, body);
-        // Update original content to reflect saved state
-        setOriginalContent(content);
+        // Check if title changed - if so, rename the file
+        const titleChanged = title !== originalTitleRef.current;
+
+        if (titleChanged) {
+          // Rename the file
+          const data = await notesAPI.rename(propSlug, title);
+          // Update original title
+          originalTitleRef.current = title;
+          // Update content after rename
+          await notesAPI.update(data.slug, { content, metadata: { title, tags } });
+          // Update original content to reflect saved state
+          setOriginalContent(content);
+          // Dispatch event to refresh file tree
+          window.dispatchEvent(new CustomEvent('notes:refresh'));
+          // Navigate to the renamed note
+          router.push(`/dashboard?note=${data.slug}`);
+        } else {
+          // Just update content
+          await notesAPI.update(propSlug, body);
+          // Update original content to reflect saved state
+          setOriginalContent(content);
+          // Dispatch event to refresh file tree
+          window.dispatchEvent(new CustomEvent('notes:refresh'));
+        }
       }
 
       setSaveStatus('saved');
