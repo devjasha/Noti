@@ -13,6 +13,7 @@ interface DownloadLink {
 export default function DownloadButton() {
   const [detectedOS, setDetectedOS] = useState<OS>("Unknown");
   const [isClient, setIsClient] = useState(false);
+  const [releaseExists, setReleaseExists] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
@@ -26,6 +27,18 @@ export default function DownloadButton() {
     } else if (platform.includes("linux") || userAgent.includes("linux")) {
       setDetectedOS("Linux");
     }
+
+    // Check if releases exist
+    fetch('https://api.github.com/repos/devjasha/Noti/releases/latest')
+      .then(res => {
+        if (res.status === 404) {
+          setReleaseExists(false);
+        }
+      })
+      .catch(() => {
+        // If fetch fails, assume releases exist to avoid blocking downloads
+        setReleaseExists(true);
+      });
   }, []);
 
   const downloadLinks: DownloadLink[] = [
@@ -62,12 +75,31 @@ export default function DownloadButton() {
     );
   }
 
+  if (!releaseExists) {
+    return (
+      <div className="flex flex-col items-center gap-4">
+        <a
+          href="https://github.com/devjasha/Noti"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-lg transition-colors inline-block shadow-lg"
+        >
+          View on GitHub
+        </a>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Releases coming soon! Star the repo to get notified.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-4">
       {primaryDownload ? (
         <>
           <a
             href={primaryDownload.url}
+            download
             className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-lg transition-colors inline-block shadow-lg"
           >
             {primaryDownload.label}
@@ -77,6 +109,7 @@ export default function DownloadButton() {
               <a
                 key={link.os}
                 href={link.url}
+                download
                 className="text-blue-600 dark:text-blue-400 hover:underline"
               >
                 {link.os}
@@ -87,6 +120,8 @@ export default function DownloadButton() {
       ) : (
         <a
           href="https://github.com/devjasha/Noti/releases/latest"
+          target="_blank"
+          rel="noopener noreferrer"
           className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-lg transition-colors inline-block"
         >
           Download Noti
