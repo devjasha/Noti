@@ -78,8 +78,17 @@ export default function PrimarySidebar({ selectedNote, onNoteSelect }: PrimarySi
       fetchFolders();
     };
 
+    // Listen for folder create events
+    const handleFolderCreate = () => {
+      setShowCreateFolder(true);
+    };
+
     window.addEventListener('notes:refresh', handleRefresh);
-    return () => window.removeEventListener('notes:refresh', handleRefresh);
+    window.addEventListener('folder:create', handleFolderCreate);
+    return () => {
+      window.removeEventListener('notes:refresh', handleRefresh);
+      window.removeEventListener('folder:create', handleFolderCreate);
+    };
   }, []);
 
   const fetchNotes = async () => {

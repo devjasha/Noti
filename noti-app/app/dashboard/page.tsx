@@ -85,6 +85,13 @@ function DashboardContent() {
           console.error('Error creating note:', error);
         }
       }
+      // Ctrl + D for New Folder
+      else if (e.ctrlKey && !e.shiftKey && e.key === 'd') {
+        e.preventDefault();
+        e.stopPropagation();
+        // Dispatch event to open folder creation modal in sidebar
+        window.dispatchEvent(new CustomEvent('folder:create'));
+      }
       // Ctrl + Shift + D for Distraction Free Mode
       else if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
         e.preventDefault();
@@ -161,6 +168,7 @@ function DashboardContent() {
               <div className="text-sm mt-4 space-y-1" style={{ color: 'var(--text-muted)' }}>
                 <p>Keyboard shortcuts:</p>
                 <p>Ctrl+N - New note</p>
+                <p>Ctrl+D - New folder</p>
                 <p>Ctrl+B - Toggle sidebar</p>
                 <p>Ctrl+Shift+D - Distraction-free mode</p>
                 <p>Ctrl+Shift+G - Toggle Git status</p>

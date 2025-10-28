@@ -231,6 +231,7 @@ This mode is perfect for focused writing sessions when you don't need navigation
 ### Keyboard Shortcuts
 
 - `Ctrl+N` - Create new note in current folder
+- `Ctrl+D` - Create new folder in current location
 - `Ctrl+S` - Save note (auto-saves on edit)
 - `Ctrl+F` - Search notes
 - `Ctrl+B` - Toggle file tree
