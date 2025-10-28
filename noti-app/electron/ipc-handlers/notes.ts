@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
-import { getAllNotes, getNote, saveNote, deleteNote, getAllTags } from '../../lib/notes.js';
+import { getAllNotes, getNote, saveNote, deleteNote, renameNote, getAllTags } from '../../lib/notes.js';
 import fs from 'fs/promises';
 import { simpleGit } from 'simple-git';
 
@@ -94,6 +94,20 @@ export function registerNoteHandlers(ipcMainInstance: typeof ipcMain, store: Sto
       return { success: true };
     } catch (error) {
       console.error('Error deleting note:', error);
+      throw error;
+    }
+  });
+
+  // Rename note
+  ipcMainInstance.handle('notes:rename', async (event, oldSlug: string, newTitle: string) => {
+    try {
+      const notesDir = await getNotesDirectory(store);
+      process.env.NOTES_DIR = notesDir;
+
+      const result = await renameNote(oldSlug, newTitle);
+      return result;
+    } catch (error) {
+      console.error('Error renaming note:', error);
       throw error;
     }
   });

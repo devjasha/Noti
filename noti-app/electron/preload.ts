@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electron', {
     create: (data: any) => ipcRenderer.invoke('notes:create', data),
     update: (slug: string, data: any) => ipcRenderer.invoke('notes:update', slug, data),
     delete: (slug: string) => ipcRenderer.invoke('notes:delete', slug),
+    rename: (oldSlug: string, newTitle: string) => ipcRenderer.invoke('notes:rename', oldSlug, newTitle),
     move: (slug: string, targetFolder: string) => ipcRenderer.invoke('notes:move', slug, targetFolder),
   },
 
