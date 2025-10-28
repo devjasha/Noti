@@ -52,16 +52,24 @@ function DashboardContent() {
 
         try {
           const currentFolder = localStorage.getItem('currentFolder') || '';
+          const { notesAPI } = await import('@/lib/electron-api');
 
-          // Generate a unique title with timestamp
-          const now = new Date();
-          const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
-          const defaultTitle = `Untitled ${timestamp}`;
-          const baseName = defaultTitle.toLowerCase().replace(/\s+/g, '-');
-          const noteSlug = currentFolder ? `${currentFolder}/${baseName}` : baseName;
+          // Find an available filename (new-note, new-note-2, new-note-3, etc.)
+          let baseName = 'new-note';
+          let noteSlug = currentFolder ? `${currentFolder}/${baseName}` : baseName;
+          let counter = 2;
+
+          // Check if file exists, if so, try new-note-2, new-note-3, etc.
+          const allNotes = await notesAPI.getAll();
+          while (allNotes.some((note: any) => note.slug === noteSlug)) {
+            baseName = `new-note-${counter}`;
+            noteSlug = currentFolder ? `${currentFolder}/${baseName}` : baseName;
+            counter++;
+          }
+
+          const defaultTitle = counter === 2 ? 'New Note' : `New Note ${counter - 1}`;
 
           // Create the note immediately
-          const { notesAPI } = await import('@/lib/electron-api');
           const data = await notesAPI.create({
             slug: noteSlug,
             content: '',
