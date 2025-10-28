@@ -38,11 +38,12 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      <section className="container mx-auto px-4 py-32 text-center relative">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-blue-50 via-transparent to-transparent dark:from-blue-950/20 dark:via-transparent" />
+        <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
           Noti
         </h1>
-        <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-4">
+        <p className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent mb-4">
           Personal Note-Taking with Git Integration
         </p>
         <p className="text-lg text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
@@ -53,18 +54,24 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-32 bg-gradient-to-b from-transparent via-gray-50 to-transparent dark:via-gray-900">
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-20">
+      <section className="py-32 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-50/50 via-transparent to-blue-50/50 dark:from-purple-950/20 dark:via-transparent dark:to-blue-950/20" />
+        <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent relative">
           Powerful Features
         </h2>
-        <FeatureShowcase features={showcaseFeatures} />
+        <div className="relative">
+          <FeatureShowcase features={showcaseFeatures} />
+        </div>
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <h2 className="text-3xl font-bold mb-6">Ready to get started?</h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-          Download Noti now and take control of your notes.
+      <section className="container mx-auto px-4 py-32 text-center relative">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-blue-50 via-purple-50/30 to-transparent dark:from-blue-950/20 dark:via-purple-950/10 dark:to-transparent" />
+        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Ready to get started?
+        </h2>
+        <p className="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-xl mx-auto">
+          Download Noti now and take control of your notes with powerful features and beautiful design.
         </p>
         <DownloadButton />
       </section>
