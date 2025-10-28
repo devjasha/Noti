@@ -59,7 +59,7 @@ export default function FeatureShowcase({ features }: FeatureShowcaseProps) {
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
           {/* Sticky Image Container - Left Side */}
           <div className="lg:w-1/2 lg:sticky lg:top-20 self-start">
-            <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-800">
+            <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl">
               {features.map((feature, index) => (
                 <div
                   key={index}
