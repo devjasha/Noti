@@ -42,11 +42,43 @@ function DashboardContent() {
 
   // Keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
       console.log('Dashboard received key:', e.key, 'Ctrl:', e.ctrlKey, 'Shift:', e.shiftKey, 'showFileTree:', showFileTree);
 
+      // Ctrl + N for New Note
+      if (e.ctrlKey && !e.shiftKey && e.key === 'n') {
+        e.preventDefault();
+        e.stopPropagation();
+
+        try {
+          const currentFolder = localStorage.getItem('currentFolder') || '';
+
+          // Generate a unique title with timestamp
+          const now = new Date();
+          const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
+          const defaultTitle = `Untitled ${timestamp}`;
+          const baseName = defaultTitle.toLowerCase().replace(/\s+/g, '-');
+          const noteSlug = currentFolder ? `${currentFolder}/${baseName}` : baseName;
+
+          // Create the note immediately
+          const { notesAPI } = await import('@/lib/electron-api');
+          const data = await notesAPI.create({
+            slug: noteSlug,
+            content: '',
+            metadata: { title: defaultTitle, tags: [] },
+          });
+
+          // Dispatch event to refresh file tree
+          window.dispatchEvent(new CustomEvent('notes:refresh'));
+
+          // Navigate to the newly created note
+          router.push(`/dashboard?note=${data.slug}`);
+        } catch (error) {
+          console.error('Error creating note:', error);
+        }
+      }
       // Ctrl + Shift + D for Distraction Free Mode
-      if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+      else if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
         e.preventDefault();
         e.stopPropagation();
         setDistractionFreeMode(prev => !prev);
@@ -78,7 +110,7 @@ function DashboardContent() {
 
     window.addEventListener('keydown', handleKeyDown, true); // Use capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [showFileTree, showGitStatus]);
+  }, [showFileTree, showGitStatus, router]);
 
   const handleViewHistoryVersion = async (commit: string) => {
     setHistoryCommit(commit);
@@ -120,6 +152,7 @@ function DashboardContent() {
               </p>
               <div className="text-sm mt-4 space-y-1" style={{ color: 'var(--text-muted)' }}>
                 <p>Keyboard shortcuts:</p>
+                <p>Ctrl+N - New note</p>
                 <p>Ctrl+B - Toggle sidebar</p>
                 <p>Ctrl+Shift+D - Distraction-free mode</p>
                 <p>Ctrl+Shift+G - Toggle Git status</p>

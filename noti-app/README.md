@@ -136,7 +136,7 @@ This format makes your notes:
 
 ### Notes Management
 
-- **Create Note**: Click "New Note" or use Ctrl+N
+- **Create Note**: Press Ctrl+N
 - **Edit Note**: Click any note in the file tree
 - **Delete Note**: Right-click note → Delete
 - **Move Note**: Right-click note → Move to Folder
@@ -230,7 +230,7 @@ This mode is perfect for focused writing sessions when you don't need navigation
 
 ### Keyboard Shortcuts
 
-- `Ctrl+N` - New note
+- `Ctrl+N` - Create new note in current folder
 - `Ctrl+S` - Save note (auto-saves on edit)
 - `Ctrl+F` - Search notes
 - `Ctrl+B` - Toggle file tree
@@ -415,7 +415,13 @@ Contributions are welcome! Please:
 
 ## Recent Updates
 
-### Latest - Distraction-Free Mode
+### Latest - Keyboard-First UX Enhancement
+- ✅ Removed New Note button in favor of keyboard shortcut
+- ✅ Added Ctrl+N keyboard shortcut to create notes in current folder
+- ✅ Cleaner, more minimalist sidebar interface
+- ✅ Improved keyboard-first workflow
+
+### Previous - Distraction-Free Mode
 - ✅ Added distraction-free mode for focused writing
 - ✅ Keyboard shortcut: Ctrl+Shift+D (Cmd+Shift+D on Mac)
 - ✅ Hides all sidebars (file tree, git status, history)

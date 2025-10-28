@@ -70,6 +70,16 @@ export default function PrimarySidebar({ selectedNote, onNoteSelect }: PrimarySi
     fetchNotes();
     fetchTags();
     fetchFolders();
+
+    // Listen for refresh events
+    const handleRefresh = () => {
+      fetchNotes();
+      fetchTags();
+      fetchFolders();
+    };
+
+    window.addEventListener('notes:refresh', handleRefresh);
+    return () => window.removeEventListener('notes:refresh', handleRefresh);
   }, []);
 
   const fetchNotes = async () => {
@@ -315,94 +325,8 @@ export default function PrimarySidebar({ selectedNote, onNoteSelect }: PrimarySi
         />
       </div>
 
-      {/* New Note & Folder Buttons */}
+      {/* Search */}
       <div className="p-4 space-y-3 border-b" style={{ borderColor: 'var(--border-light)' }}>
-        <div className="flex gap-2">
-          {/* New Note Dropdown */}
-          <div className="flex-1 relative">
-            <button
-              onClick={() => {
-                router.push(`/dashboard?note=new&folder=${currentFolder}`);
-              }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-white font-semibold transition-all hover:scale-105 active:scale-95 hover:brightness-110"
-              style={{
-                background: 'var(--primary)',
-                borderRadius: 'var(--radius-sm)',
-                boxShadow: 'var(--shadow-sm)'
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              <span>New Note</span>
-            </button>
-            <button
-              onClick={() => setShowNewNoteMenu(!showNewNoteMenu)}
-              className="absolute right-0 top-0 h-full px-2 text-white transition-all hover:brightness-110"
-              style={{
-                background: 'var(--primary)',
-                borderLeft: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '0 var(--radius-sm) var(--radius-sm) 0'
-              }}
-            >
-              <span className="text-xs">{showNewNoteMenu ? '▲' : '▼'}</span>
-            </button>
-
-            {/* Dropdown Menu */}
-            {showNewNoteMenu && (
-              <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setShowNewNoteMenu(false)}
-                />
-                <div
-                  className="absolute top-full left-0 right-0 mt-1 py-1 z-20 rounded"
-                  style={{
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border-light)',
-                    boxShadow: 'var(--shadow-lg)'
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      setShowTemplatePicker(true);
-                      setShowNewNoteMenu(false);
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm transition-colors"
-                    style={{ color: 'var(--text-primary)' }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--background)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    📄 From Template...
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* New Folder Button */}
-          <button
-            onClick={() => setShowCreateFolder(true)}
-            className="px-3 py-2.5 text-sm font-semibold transition-all hover:scale-105 active:scale-95"
-            style={{
-              background: 'var(--background)',
-              border: '2px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
-              color: 'var(--text-primary)'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
-            title="New Folder"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-              <line x1="12" y1="11" x2="12" y2="17"/>
-              <line x1="9" y1="14" x2="15" y2="14"/>
-            </svg>
-          </button>
-        </div>
-
         {/* Search Input */}
         <input
           type="text"
