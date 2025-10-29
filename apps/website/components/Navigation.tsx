@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import SearchButton from "./SearchButton";
 
 export default function Navigation() {
@@ -34,7 +35,26 @@ export default function Navigation() {
       }`}
     >
       <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            onClick={() => scrollToSection("hero")}
+          >
+            <Image
+              src="/logo/logo-schlechta-bildmarke.svg"
+              alt="Noti Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+            />
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Noti
+            </span>
+          </Link>
+
+          {/* Navigation Links */}
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"

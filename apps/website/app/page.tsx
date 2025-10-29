@@ -1,6 +1,7 @@
 import DownloadButton from "@/components/DownloadButton";
 import FeatureShowcase from "@/components/FeatureShowcase";
 import Navigation from "@/components/Navigation";
+import Image from "next/image";
 
 export default function Home() {
   const showcaseFeatures = [
@@ -41,6 +42,16 @@ export default function Home() {
       <Navigation />
       <section id="hero" className="py-32 pt-40 text-center relative">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-blue-50 via-transparent to-transparent dark:from-blue-950/20 dark:via-transparent" />
+        <div className="flex justify-center mb-8">
+          <Image
+            src="/logo/logo-schlechta-bildmarke.svg"
+            alt="Noti Logo"
+            width={120}
+            height={120}
+            className="w-24 h-24 md:w-32 md:h-32 animate-float"
+            priority
+          />
+        </div>
         <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
           Noti
         </h1>
