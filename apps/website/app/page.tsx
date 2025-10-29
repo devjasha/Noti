@@ -40,7 +40,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      <section id="hero" className="py-32 pt-40 text-center relative">
+      <section id="hero" className="py-24 md:py-32 pt-32 md:pt-40 px-6 md:px-4 text-center relative">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-blue-50 via-transparent to-transparent dark:from-blue-950/20 dark:via-transparent" />
         <div className="flex justify-center mb-8">
           <Image
@@ -52,13 +52,13 @@ export default function Home() {
             priority
           />
         </div>
-        <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
           Noti
         </h1>
-        <p className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent mb-4">
+        <p className="text-lg md:text-xl lg:text-2xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent mb-4">
           Personal Note-Taking with Git Integration
         </p>
-        <p className="text-lg text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
+        <p className="text-base md:text-lg text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto px-4">
           A powerful, local-first note-taking application with built-in version control,
           markdown support, and beautiful themes.
         </p>
@@ -66,9 +66,9 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-32 relative">
+      <section id="features" className="py-24 md:py-32 px-6 md:px-4 relative">
         <div className="absolute inset-0" />
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent relative">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-16 md:mb-20 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent relative">
           Powerful Features
         </h2>
         <div className="relative">
@@ -77,19 +77,19 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section id="download" className="mx-auto px-4 py-32 text-center relative">
+      <section id="download" className="mx-auto px-6 md:px-4 py-24 md:py-32 text-center relative">
         <div className="absolute inset-0 -z-10  to-transparent dark:from-blue-950/20 dark:via-purple-950/10 dark:to-transparent" />
-        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Ready to get started?
         </h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-xl mx-auto">
+        <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-xl mx-auto">
           Download Noti now and take control of your notes with powerful features and beautiful design.
         </p>
         <DownloadButton />
       </section>
 
       {/* Footer */}
-      <footer className="py-8 text-center text-muted-foreground">
+      <footer className="py-8 px-6 md:px-4 text-center text-muted-foreground">
         <p className="mb-2">
           Open Source •{" "}
           <a

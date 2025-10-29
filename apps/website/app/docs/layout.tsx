@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="border-b border-gray-200 dark:border-gray-800">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-6 md:px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Image
               src="/logo/logo-schlechta-bildmarke.svg"
@@ -35,10 +35,10 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <div className="flex-1 container mx-auto px-4 py-8">
+      <div className="flex-1 container mx-auto px-6 md:px-4 py-8">
         <div className="flex gap-8">
           {/* Sidebar */}
-          <aside className="w-64 flex-shrink-0">
+          <aside className="hidden md:block w-64 flex-shrink-0">
             <nav className="sticky top-8 space-y-1">
               <Link
                 href="/docs"

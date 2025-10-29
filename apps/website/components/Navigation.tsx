@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Github } from "lucide-react";
+import { Github, Menu, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import SearchButton from "./SearchButton";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,11 +20,24 @@ export default function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    // Prevent scrolling when mobile menu is open
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -34,7 +48,7 @@ export default function Navigation() {
           : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-4 py-3">
+      <div className="container mx-auto px-6 md:px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link
@@ -54,8 +68,8 @@ export default function Navigation() {
             </span>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="flex items-center gap-2">
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
@@ -100,8 +114,71 @@ export default function Navigation() {
               Download
             </Button>
           </div>
+
+          {/* Mobile Hamburger Menu Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 top-[60px] bg-background/95 backdrop-blur-lg z-40">
+          <div className="container mx-auto px-6 py-6">
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-lg py-6"
+                onClick={() => scrollToSection("hero")}
+              >
+                Home
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-lg py-6"
+                onClick={() => scrollToSection("features")}
+              >
+                Features
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-lg py-6"
+                asChild
+              >
+                <Link href="/docs" onClick={() => setIsMobileMenuOpen(false)}>Docs</Link>
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-lg py-6"
+                asChild
+              >
+                <a
+                  href="https://github.com/devjasha/Noti"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Github className="h-5 w-5 mr-2" />
+                  GitHub
+                </a>
+              </Button>
+              <Button
+                className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                onClick={() => scrollToSection("download")}
+              >
+                Download
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
