@@ -234,6 +234,64 @@ Noti uses a multi-process architecture:
 
 All file and git operations happen in the main process for security and performance. The renderer communicates via IPC (Inter-Process Communication).
 
+### Code Signing (Production Releases)
+
+For production releases, you should sign your application to ensure users can trust the installer and avoid security warnings.
+
+#### macOS Code Signing
+
+1. **Obtain a Developer ID Certificate** from Apple Developer Program
+2. **Export the certificate** as a `.p12` file
+3. **Set environment variables** when building:
+
+```bash
+export CSC_LINK=/path/to/certificate.p12
+export CSC_KEY_PASSWORD=your_certificate_password
+npm run electron:build:mac
+```
+
+For GitHub Actions, add these as secrets:
+- `MAC_CERTS` - Base64-encoded .p12 certificate
+- `MAC_CERTS_PASSWORD` - Certificate password
+
+Then update the workflow:
+
+```yaml
+- name: Build desktop app
+  run: |
+    cd apps/desktop
+    npm ci
+    npm run electron:build
+  env:
+    CSC_LINK: ${{ secrets.MAC_CERTS }}
+    CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+#### Windows Code Signing
+
+1. **Obtain a code signing certificate** (from DigiCert, Sectigo, etc.)
+2. **Export as `.pfx` file**
+3. **Set environment variables**:
+
+```bash
+export WIN_CSC_LINK=/path/to/certificate.pfx
+export WIN_CSC_KEY_PASSWORD=your_password
+npm run electron:build:win
+```
+
+For GitHub Actions, add secrets:
+- `WIN_CERTS` - Base64-encoded .pfx certificate
+- `WIN_CERTS_PASSWORD` - Certificate password
+
+#### Linux
+
+Linux builds don't require code signing, but you can sign packages with GPG if desired.
+
+#### Building Without Code Signing
+
+If you're building for personal use or testing, the build will work without certificates. You'll see a warning during the build process, but the application will still be packaged successfully. Users may see security warnings when installing unsigned applications.
+
 ## 🐛 Troubleshooting
 
 ### App won't start

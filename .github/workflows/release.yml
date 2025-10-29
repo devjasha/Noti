@@ -33,6 +33,11 @@ jobs:
       - name: Install root dependencies
         run: npm ci
 
+      - name: Clean dist directory
+        run: |
+          cd apps/desktop
+          rm -rf dist
+
       - name: Build desktop app
         run: |
           cd apps/desktop
