@@ -41,34 +41,33 @@ export default function Navigation() {
   };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-background/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-6xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-            onClick={() => scrollToSection("hero")}
-          >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+    <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+      <div
+        className={`max-w-5xl mx-auto rounded-2xl transition-all duration-300 ${
+          isScrolled
+            ? "bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg shadow-gray-200/50 dark:shadow-black/20"
+            : "bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border border-gray-200/30 dark:border-gray-700/30"
+        }`}
+      >
+        <div className="px-6 py-3">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              onClick={() => scrollToSection("hero")}
+            >
               <Image
                 src="/logo/logo-schlechta-bildmarke.svg"
                 alt="Noti Logo"
-                width={20}
-                height={20}
-                className="w-5 h-5"
+                width={32}
+                height={32}
+                className="w-8 h-8"
               />
-            </div>
-            <span className="text-xl font-semibold text-gray-900 dark:text-white">
-              Noti
-            </span>
-          </Link>
+              <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                Noti
+              </span>
+            </Link>
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-1">
@@ -123,12 +122,13 @@ export default function Navigation() {
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
+          </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-[60px] bg-background/95 backdrop-blur-lg z-40">
+        <div className="md:hidden fixed inset-0 top-[80px] bg-background/95 backdrop-blur-lg z-40">
           <div className="container mx-auto px-6 py-6">
             <div className="flex flex-col gap-3">
               <Button

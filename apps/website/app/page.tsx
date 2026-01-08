@@ -45,16 +45,14 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center space-y-8">
             <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <Image
-                  src="/logo/logo-schlechta-bildmarke.svg"
-                  alt="Noti Logo"
-                  width={48}
-                  height={48}
-                  className="w-12 h-12"
-                  priority
-                />
-              </div>
+              <Image
+                src="/logo/logo-schlechta-bildmarke.svg"
+                alt="Noti Logo"
+                width={80}
+                height={80}
+                className="w-20 h-20 animate-float"
+                priority
+              />
             </div>
             
             <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight">
