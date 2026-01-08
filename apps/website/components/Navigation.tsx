@@ -44,43 +44,39 @@ export default function Navigation() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-background/60 backdrop-blur-lg"
+          ? "bg-background/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800"
           : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-6 md:px-4 py-3">
+      <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             onClick={() => scrollToSection("hero")}
           >
-            <Image
-              src="/logo/logo-schlechta-bildmarke.svg"
-              alt="Noti Logo"
-              width={32}
-              height={32}
-              className="w-8 h-8"
-            />
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <Image
+                src="/logo/logo-schlechta-bildmarke.svg"
+                alt="Noti Logo"
+                width={20}
+                height={20}
+                className="w-5 h-5"
+              />
+            </div>
+            <span className="text-xl font-semibold text-gray-900 dark:text-white">
               Noti
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => scrollToSection("hero")}
-            >
-              Home
-            </Button>
+          <div className="hidden md:flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => scrollToSection("features")}
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
               Features
             </Button>
@@ -88,6 +84,7 @@ export default function Navigation() {
               variant="ghost"
               size="sm"
               asChild
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
               <Link href="/docs">Docs</Link>
             </Button>
@@ -96,20 +93,21 @@ export default function Navigation() {
               variant="ghost"
               size="sm"
               asChild
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
               <a
                 href="https://github.com/devjasha/Noti"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Github className="h-4 w-4" />
+                <Github className="h-4 w-4 mr-2" />
                 GitHub
               </a>
             </Button>
             <Button
               size="sm"
               onClick={() => scrollToSection("download")}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="ml-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
             >
               Download
             </Button>

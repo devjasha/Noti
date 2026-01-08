@@ -1,109 +1,150 @@
 import DownloadButton from "@/components/DownloadButton";
-import FeatureShowcase from "@/components/FeatureShowcase";
 import Navigation from "@/components/Navigation";
 import Image from "next/image";
 
 export default function Home() {
-  const showcaseFeatures = [
+  const features = [
     {
-      title: "📝 Rich Markdown Editor",
-      description: "Write with TipTap editor supporting tables, code blocks, task lists, and more with syntax highlighting. Format your notes beautifully with real-time preview and intuitive controls.",
-      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Markdown+Editor",
+      icon: "📝",
+      title: "Rich Markdown Editor",
+      description: "Write with powerful TipTap editor supporting tables, code blocks, task lists, and syntax highlighting.",
     },
     {
-      title: "🔄 Git Integration",
-      description: "Full Git support with automatic commits, history tracking, and version control built right in. Never lose your work with comprehensive version control and sync capabilities.",
-      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Git+Integration",
+      icon: "🔄",
+      title: "Git Integration",
+      description: "Built-in version control with automatic commits, history tracking, and seamless remote sync.",
     },
     {
-      title: "📂 Folder Organization",
-      description: "Organize your notes with a flexible folder structure and easy navigation. Create nested folders, move notes around, and keep everything perfectly organized.",
-      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Folder+Organization",
+      icon: "📂",
+      title: "Folder Organization",
+      description: "Organize notes with flexible folder structures and intuitive drag-and-drop navigation.",
     },
     {
-      title: "🏷️ Tags & Search",
-      description: "Tag your notes and search through them quickly to find what you need. Powerful search functionality helps you locate any note in seconds.",
-      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Tags+%26+Search",
+      icon: "🏷️",
+      title: "Tags & Search",
+      description: "Tag your notes and find them instantly with powerful full-text search capabilities.",
     },
     {
-      title: "🎨 Custom Themes",
-      description: "Choose from multiple beautiful themes including Dracula, Nord, Kanagawa, and more. Customize your workspace to match your style and reduce eye strain.",
-      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Custom+Themes",
+      icon: "🎨",
+      title: "Custom Themes",
+      description: "Choose from beautiful themes like Dracula, Nord, Kanagawa, or create your own.",
     },
     {
-      title: "💾 Local-First & Private",
-      description: "All your data stays on your machine. Full control and privacy guaranteed. No cloud sync required unless you want it through Git.",
-      image: "https://placehold.co/1200x800/1e293b/e2e8f0?text=Local-First",
+      icon: "💾",
+      title: "Local-First & Private",
+      description: "Your data stays on your machine. Full control and privacy guaranteed.",
     },
   ];
 
   return (
     <div className="min-h-screen">
       <Navigation />
-      <section id="hero" className="py-24 md:py-32 pt-32 md:pt-40 px-6 md:px-4 text-center relative">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-blue-50 via-transparent to-transparent dark:from-blue-950/20 dark:via-transparent" />
-        <div className="flex justify-center mb-8">
-          <Image
-            src="/logo/logo-schlechta-bildmarke.svg"
-            alt="Noti Logo"
-            width={120}
-            height={120}
-            className="w-24 h-24 md:w-32 md:h-32 animate-float"
-            priority
-          />
+      
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center space-y-8">
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <Image
+                  src="/logo/logo-schlechta-bildmarke.svg"
+                  alt="Noti Logo"
+                  width={48}
+                  height={48}
+                  className="w-12 h-12"
+                  priority
+                />
+              </div>
+            </div>
+            
+            <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight">
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Noti
+              </span>
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              A powerful, local-first note-taking app with built-in Git version control, 
+              markdown support, and beautiful themes.
+            </p>
+            
+            <div className="pt-4">
+              <DownloadButton />
+            </div>
+          </div>
         </div>
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
-          Noti
-        </h1>
-        <p className="text-lg md:text-xl lg:text-2xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent mb-4">
-          Personal Note-Taking with Git Integration
-        </p>
-        <p className="text-base md:text-lg text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto px-4">
-          A powerful, local-first note-taking application with built-in version control,
-          markdown support, and beautiful themes.
-        </p>
-        <DownloadButton />
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-24 md:py-32 px-6 md:px-4 relative">
-        <div className="absolute inset-0" />
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-16 md:mb-20 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent relative">
-          Powerful Features
-        </h2>
-        <div className="relative">
-          <FeatureShowcase features={showcaseFeatures} />
+      {/* Features Grid */}
+      <section id="features" className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Everything you need
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Powerful features designed for developers and note-taking enthusiasts
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="group p-8 rounded-2xl bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10"
+              >
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section id="download" className="mx-auto px-6 md:px-4 py-24 md:py-32 text-center relative">
-        <div className="absolute inset-0 -z-10  to-transparent dark:from-blue-950/20 dark:via-purple-950/10 dark:to-transparent" />
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Ready to get started?
-        </h2>
-        <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-xl mx-auto">
-          Download Noti now and take control of your notes with powerful features and beautiful design.
-        </p>
-        <DownloadButton />
+      <section id="download" className="py-24 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="p-12 rounded-3xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-100 dark:border-blue-900">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Ready to get started?
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+              Download Noti and take control of your notes with powerful features and beautiful design.
+            </p>
+            <DownloadButton />
+          </div>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-6 md:px-4 text-center text-muted-foreground">
-        <p className="mb-2">
-          Open Source •{" "}
-          <a
-            href="https://github.com/devjasha/Noti"
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            GitHub
-          </a>
-        </p>
-        <p className="text-sm">
-          Made with ❤️ by devjasha
-        </p>
+      <footer className="py-12 px-6 border-t border-gray-200 dark:border-gray-800">
+        <div className="max-w-6xl mx-auto text-center">
+          <div className="flex justify-center items-center gap-6 mb-4 text-gray-600 dark:text-gray-400">
+            <a
+              href="https://github.com/devjasha/Noti"
+              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub
+            </a>
+            <span>•</span>
+            <a
+              href="/docs"
+              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              Documentation
+            </a>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-500">
+            Made with ❤️ by devjasha • Open Source
+          </p>
+        </div>
       </footer>
     </div>
   );
