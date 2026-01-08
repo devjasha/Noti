@@ -17,7 +17,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]
 
     steps:
       - name: Checkout code
@@ -52,13 +52,6 @@ jobs:
         with:
           name: windows-installer
           path: apps/desktop/dist/*.exe
-
-      - name: Upload macOS artifacts
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-installer
-          path: apps/desktop/dist/*.dmg
 
       - name: Upload Linux artifacts
         if: matrix.os == 'ubuntu-latest'
@@ -96,7 +89,6 @@ jobs:
           prerelease: false
           files: |
             artifacts/windows-installer/*.exe
-            artifacts/macos-installer/*.dmg
             artifacts/linux-installer/*.AppImage
             artifacts/linux-installer/*.deb
           body: |
@@ -104,9 +96,6 @@ jobs:
 
             ### Windows
             - Download `Noti-Setup-*.exe` and run the installer
-
-            ### macOS
-            - Download `Noti-*.dmg`, open it, and drag Noti to Applications
 
             ### Linux
             - **AppImage**: Download `Noti-*.AppImage`, make it executable (`chmod +x`), and run it

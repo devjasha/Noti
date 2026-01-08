@@ -27,7 +27,6 @@ A powerful, cross-platform desktop note-taking application that combines the sim
 Download the latest release for your platform from the [Releases](https://github.com/devjasha/Noti/releases) page:
 
 - **Windows**: `Noti-Setup-1.0.0.exe`
-- **macOS**: `Noti-1.0.0.dmg`
 - **Linux**: `Noti-1.0.0.AppImage` or `noti_1.0.0_amd64.deb`
 
 ### Build from Source
@@ -55,7 +54,6 @@ Download the latest release for your platform from the [Releases](https://github
 
    # For specific platforms
    npm run electron:build:win   # Windows
-   npm run electron:build:mac   # macOS
    npm run electron:build:linux # Linux
    ```
 
