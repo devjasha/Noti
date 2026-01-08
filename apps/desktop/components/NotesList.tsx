@@ -116,7 +116,7 @@ export default function NotesList() {
           {filteredNotes.map(note => (
             <Link
               key={note.slug}
-              href={`/note/${note.slug}`}
+              href={`/dashboard?note=${note.slug}`}
               className="block p-5 transition-all"
               style={{
                 background: 'var(--surface)',
